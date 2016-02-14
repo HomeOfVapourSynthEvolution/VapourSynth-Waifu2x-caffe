@@ -38,9 +38,9 @@ Usage
 Benchmark
 =========
 
-Here is the performance comparison between Waifu2x-w2xc and Waifu2x-caffe.
+Here is the performance comparison between `Waifu2x-w2xc` and `Waifu2x-caffe`.
 
-Image size: 640x360
+Image size: 640x360<br />
 GPU: GTX 660
 
 w2xc.Waifu2x(noise=0, scale=2, block=block, photo=False, gpu=1)
