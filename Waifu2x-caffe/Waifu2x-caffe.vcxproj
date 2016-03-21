@@ -27,8 +27,8 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>include;C:\boost_1_59_0;C:\caffe\install\include;C:\caffe\install\gflags\Include;C:\caffe\install\glog\include;C:\caffe\install\hdf5\include;C:\caffe\install\protobuf\include;C:\caffe\install\zlib\include;C:\cuda\include;C:\opencv\install\include;C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v7.5\include;C:\Program Files %28x86%29\IntelSWTools\compilers_and_libraries_2016.1.146\windows\mkl\include;C:\Program Files %28x86%29\VapourSynth\sdk\include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\boost_1_59_0\lib64-msvc-12.0;C:\caffe\install\lib;C:\caffe\install\gflags\Lib;C:\caffe\install\glog\lib;C:\caffe\install\hdf5\lib;C:\caffe\install\protobuf\lib;C:\caffe\install\zlib\lib;C:\cuda\lib\x64;C:\opencv\install\x64\vc12\staticlib;C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v7.5\lib\x64;C:\Program Files %28x86%29\IntelSWTools\compilers_and_libraries_2016.1.146\windows\mkl\lib\intel64_win;$(LibraryPath)</LibraryPath>
+    <IncludePath>include;C:\boost_1_59_0;C:\caffe\install\include;C:\caffe\install\gflags\Include;C:\caffe\install\glog\include;C:\caffe\install\hdf5\include;C:\caffe\install\protobuf\include;C:\caffe\install\zlib\include;C:\cuda\include;C:\opencv\install\include;C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v7.5\include;C:\Program Files %28x86%29\IntelSWTools\compilers_and_libraries\windows\mkl\include;C:\Program Files %28x86%29\VapourSynth\sdk\include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\boost_1_59_0\lib64-msvc-12.0;C:\caffe\install\lib;C:\caffe\install\gflags\Lib;C:\caffe\install\glog\lib;C:\caffe\install\hdf5\lib;C:\caffe\install\protobuf\lib;C:\caffe\install\zlib\lib;C:\cuda\lib\x64;C:\opencv\install\x64\vc12\staticlib;C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v7.5\lib\x64;C:\Program Files %28x86%29\IntelSWTools\compilers_and_libraries\windows\mkl\lib\intel64_win;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -45,8 +45,7 @@
       <SubSystem>Windows</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>libboost_filesystem-vc120-mt-1_59.lib;libboost_iostreams-vc120-mt-1_59.lib;libboost_system-vc120-mt-1_59.lib;libboost_thread-vc120-mt-1_59.lib;caffe.lib;proto.lib;gflags.lib;glog.lib;libhdf5.lib;libhdf5_hl.lib;libprotobuf.lib;zlibstatic.lib;cudnn.lib;IlmImf.lib;ippicvmt.lib;libjasper.lib;libjpeg.lib;libpng.lib;libtiff.lib;libwebp.lib;opencv_world310.lib;cublas.lib;cudart_static.lib;curand.lib;mkl_core.lib;mkl_intel_lp64.lib;mkl_intel_thread.lib;shlwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <DelayLoadDLLs>cudnn64_4.dll;%(DelayLoadDLLs)</DelayLoadDLLs>
+      <AdditionalDependencies>libboost_filesystem-vc120-mt-1_59.lib;libboost_iostreams-vc120-mt-1_59.lib;libboost_system-vc120-mt-1_59.lib;libboost_thread-vc120-mt-1_59.lib;caffe.lib;proto.lib;gflags.lib;glog.lib;libhdf5.lib;libhdf5_hl.lib;libprotobuf.lib;zlibstatic.lib;cudnn.lib;IlmImf.lib;ippicvmt.lib;libjasper.lib;libjpeg.lib;libpng.lib;libtiff.lib;libwebp.lib;opencv_world310.lib;cublas.lib;cudart_static.lib;curand.lib;mkl_core.lib;mkl_intel_lp64.lib;mkl_intel_thread.lib;libmmds.lib;shlwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
