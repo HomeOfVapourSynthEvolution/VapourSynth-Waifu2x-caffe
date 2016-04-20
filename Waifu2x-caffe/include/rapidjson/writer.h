@@ -23,6 +23,16 @@
 #include "stringbuffer.h"
 #include <new>      // placement new
 
+#if defined(RAPIDJSON_SIMD) && defined(_MSC_VER)
+#include <intrin.h>
+#pragma intrinsic(_BitScanForward)
+#endif
+#ifdef RAPIDJSON_SSE42
+#include <nmmintrin.h>
+#elif defined(RAPIDJSON_SSE2)
+#include <emmintrin.h>
+#endif
+
 #ifdef _MSC_VER
 RAPIDJSON_DIAG_PUSH
 RAPIDJSON_DIAG_OFF(4127) // conditional expression is constant
@@ -76,6 +86,8 @@ class Writer {
 public:
     typedef typename SourceEncoding::Ch Ch;
 
+    static const int kDefaultMaxDecimalPlaces = 324;
+
     //! Constructor
     /*! \param os Output stream.
         \param stackAllocator User supplied allocator. If it is null, it will create a private one.
@@ -83,11 +95,11 @@ public:
     */
     explicit
     Writer(OutputStream& os, StackAllocator* stackAllocator = 0, size_t levelDepth = kDefaultLevelDepth) : 
-        os_(&os), level_stack_(stackAllocator, levelDepth * sizeof(Level)), hasRoot_(false) {}
+        os_(&os), level_stack_(stackAllocator, levelDepth * sizeof(Level)), maxDecimalPlaces_(kDefaultMaxDecimalPlaces), hasRoot_(false) {}
 
     explicit
     Writer(StackAllocator* allocator = 0, size_t levelDepth = kDefaultLevelDepth) :
-        os_(0), level_stack_(allocator, levelDepth * sizeof(Level)), hasRoot_(false) {}
+        os_(0), level_stack_(allocator, levelDepth * sizeof(Level)), maxDecimalPlaces_(kDefaultMaxDecimalPlaces), hasRoot_(false) {}
 
     //! Reset the writer with a new stream.
     /*!
@@ -121,6 +133,35 @@ public:
         return hasRoot_ && level_stack_.Empty();
     }
 
+    int GetMaxDecimalPlaces() const {
+        return maxDecimalPlaces_;
+    }
+
+    //! Sets the maximum number of decimal places for double output.
+    /*!
+        This setting truncates the output with specified number of decimal places.
+
+        For example, 
+
+        \code
+        writer.SetMaxDecimalPlaces(3);
+        writer.StartArray();
+        writer.Double(0.12345);                 // "0.123"
+        writer.Double(0.0001);                  // "0.0"
+        writer.Double(1.234567890123456e30);    // "1.234567890123456e30" (do not truncate significand for positive exponent)
+        writer.Double(1.23e-4);                 // "0.0"                  (do truncate significand for negative exponent)
+        writer.EndArray();
+        \endcode
+
+        The default setting does not truncate any decimal places. You can restore to this setting by calling
+        \code
+        writer.SetMaxDecimalPlaces(Writer::kDefaultMaxDecimalPlaces);
+        \endcode
+    */
+    void SetMaxDecimalPlaces(int maxDecimalPlaces) {
+        maxDecimalPlaces_ = maxDecimalPlaces;
+    }
+
     /*!@name Implementation of Handler
         \see Handler
     */
@@ -139,6 +180,12 @@ public:
         \return Whether it is succeed.
     */
     bool Double(double d)       { Prefix(kNumberType); return WriteDouble(d); }
+
+    bool RawNumber(const Ch* str, SizeType length, bool copy = false) {
+        (void)copy;
+        Prefix(kNumberType);
+        return WriteString(str, length);
+    }
 
     bool String(const Ch* str, SizeType length, bool copy = false) {
         (void)copy;
@@ -197,6 +244,16 @@ public:
     bool Key(const Ch* str) { return Key(str, internal::StrLen(str)); }
 
     //@}
+
+    //! Write a raw JSON value.
+    /*!
+        For user to write a stringified JSON as a value.
+
+        \param json A well-formed JSON value. It should not contain null character within [0, length - 1] range.
+        \param length Length of the json.
+        \param type Type of the root of json.
+    */
+    bool RawValue(const Ch* json, size_t length, Type type) { Prefix(type); return WriteRawValue(json, length); }
 
 protected:
     //! Information for each nested level
@@ -266,7 +323,7 @@ protected:
             return false;
         
         char buffer[25];
-        char* end = internal::dtoa(d, buffer);
+        char* end = internal::dtoa(d, buffer, maxDecimalPlaces_);
         PutReserve(*os_, static_cast<size_t>(end - buffer));
         for (char* p = buffer; p != end; ++p)
             PutUnsafe(*os_, static_cast<typename TargetEncoding::Ch>(*p));
@@ -294,7 +351,7 @@ protected:
 
         PutUnsafe(*os_, '\"');
         GenericStringStream<SourceEncoding> is(str);
-        while (RAPIDJSON_LIKELY(is.Tell() < length)) {
+        while (ScanWriteUnescapedString(is, length)) {
             const Ch c = is.Peek();
             if (!TargetEncoding::supportUnicode && static_cast<unsigned>(c) >= 0x80) {
                 // Unicode escaping
@@ -347,10 +404,23 @@ protected:
         return true;
     }
 
+    bool ScanWriteUnescapedString(GenericStringStream<SourceEncoding>& is, size_t length) {
+        return RAPIDJSON_LIKELY(is.Tell() < length);
+    }
+
     bool WriteStartObject() { os_->Put('{'); return true; }
     bool WriteEndObject()   { os_->Put('}'); return true; }
     bool WriteStartArray()  { os_->Put('['); return true; }
     bool WriteEndArray()    { os_->Put(']'); return true; }
+
+    bool WriteRawValue(const Ch* json, size_t length) {
+        PutReserve(*os_, length);
+        for (size_t i = 0; i < length; i++) {
+            RAPIDJSON_ASSERT(json[i] != '\0');
+            PutUnsafe(*os_, json[i]);
+        }
+        return true;
+    }
 
     void Prefix(Type type) {
         (void)type;
@@ -374,6 +444,7 @@ protected:
 
     OutputStream* os_;
     internal::Stack<StackAllocator> level_stack_;
+    int maxDecimalPlaces_;
     bool hasRoot_;
 
 private:
@@ -422,10 +493,73 @@ inline bool Writer<StringBuffer>::WriteDouble(double d) {
         return false;
     
     char *buffer = os_->Push(25);
-    char* end = internal::dtoa(d, buffer);
+    char* end = internal::dtoa(d, buffer, maxDecimalPlaces_);
     os_->Pop(static_cast<size_t>(25 - (end - buffer)));
     return true;
 }
+
+#if defined(RAPIDJSON_SSE2) || defined(RAPIDJSON_SSE42)
+template<>
+inline bool Writer<StringBuffer>::ScanWriteUnescapedString(StringStream& is, size_t length) {
+    if (length < 16)
+        return RAPIDJSON_LIKELY(is.Tell() < length);
+
+    if (!RAPIDJSON_LIKELY(is.Tell() < length))
+        return false;
+
+    const char* p = is.src_;
+    const char* end = is.head_ + length;
+    const char* nextAligned = reinterpret_cast<const char*>((reinterpret_cast<size_t>(p) + 15) & static_cast<size_t>(~15));
+    const char* endAligned = reinterpret_cast<const char*>(reinterpret_cast<size_t>(end) & static_cast<size_t>(~15));
+    if (nextAligned > end)
+        return true;
+
+    while (p != nextAligned)
+        if (*p < 0x20 || *p == '\"' || *p == '\\') {
+            is.src_ = p;
+            return RAPIDJSON_LIKELY(is.Tell() < length);
+        }
+        else
+            os_->PutUnsafe(*p++);
+
+    // The rest of string using SIMD
+    static const char dquote[16] = { '\"', '\"', '\"', '\"', '\"', '\"', '\"', '\"', '\"', '\"', '\"', '\"', '\"', '\"', '\"', '\"' };
+    static const char bslash[16] = { '\\', '\\', '\\', '\\', '\\', '\\', '\\', '\\', '\\', '\\', '\\', '\\', '\\', '\\', '\\', '\\' };
+    static const char space[16]  = { 0x19, 0x19, 0x19, 0x19, 0x19, 0x19, 0x19, 0x19, 0x19, 0x19, 0x19, 0x19, 0x19, 0x19, 0x19, 0x19 };
+    const __m128i dq = _mm_loadu_si128(reinterpret_cast<const __m128i *>(&dquote[0]));
+    const __m128i bs = _mm_loadu_si128(reinterpret_cast<const __m128i *>(&bslash[0]));
+    const __m128i sp = _mm_loadu_si128(reinterpret_cast<const __m128i *>(&space[0]));
+
+    for (; p != endAligned; p += 16) {
+        const __m128i s = _mm_load_si128(reinterpret_cast<const __m128i *>(p));
+        const __m128i t1 = _mm_cmpeq_epi8(s, dq);
+        const __m128i t2 = _mm_cmpeq_epi8(s, bs);
+        const __m128i t3 = _mm_cmpeq_epi8(_mm_max_epu8(s, sp), sp); // s < 0x20 <=> max(s, 0x19) == 0x19
+        const __m128i x = _mm_or_si128(_mm_or_si128(t1, t2), t3);
+        unsigned short r = static_cast<unsigned short>(_mm_movemask_epi8(x));
+        if (RAPIDJSON_UNLIKELY(r != 0)) {   // some of characters is escaped
+            SizeType len;
+#ifdef _MSC_VER         // Find the index of first escaped
+            unsigned long offset;
+            _BitScanForward(&offset, r);
+            len = offset;
+#else
+            len = static_cast<SizeType>(__builtin_ffs(r) - 1);
+#endif
+            char* q = reinterpret_cast<char*>(os_->PushUnsafe(len));
+            for (size_t i = 0; i < len; i++)
+                q[i] = p[i];
+
+            p += len;
+            break;
+        }
+        _mm_storeu_si128(reinterpret_cast<__m128i *>(os_->PushUnsafe(16)), s);
+    }
+
+    is.src_ = p;
+    return RAPIDJSON_LIKELY(is.Tell() < length);
+}
+#endif // defined(RAPIDJSON_SSE2) || defined(RAPIDJSON_SSE42)
 
 RAPIDJSON_NAMESPACE_END
 

@@ -23,6 +23,11 @@ RAPIDJSON_DIAG_PUSH
 RAPIDJSON_DIAG_OFF(switch-enum)
 #endif
 
+#ifdef _MSC_VER
+RAPIDJSON_DIAG_PUSH
+RAPIDJSON_DIAG_OFF(4512) // assignment operator could not be generated
+#endif
+
 RAPIDJSON_NAMESPACE_BEGIN
 
 static const SizeType kPointerInvalidIndex = ~SizeType(0);  //!< Represents an invalid index in GenericPointer::Token
@@ -987,11 +992,11 @@ private:
             src_++;
             Ch c = 0;
             for (int j = 0; j < 2; j++) {
-                c <<= 4;
+                c = static_cast<Ch>(c << 4);
                 Ch h = *src_;
-                if      (h >= '0' && h <= '9') c += h - '0';
-                else if (h >= 'A' && h <= 'F') c += h - 'A' + 10;
-                else if (h >= 'a' && h <= 'f') c += h - 'a' + 10;
+                if      (h >= '0' && h <= '9') c = static_cast<Ch>(c + h - '0');
+                else if (h >= 'A' && h <= 'F') c = static_cast<Ch>(c + h - 'A' + 10);
+                else if (h >= 'a' && h <= 'f') c = static_cast<Ch>(c + h - 'a' + 10);
                 else {
                     valid_ = false;
                     return 0;
@@ -1339,6 +1344,10 @@ bool EraseValueByPointer(T& root, const CharType(&source)[N]) {
 RAPIDJSON_NAMESPACE_END
 
 #ifdef __clang__
+RAPIDJSON_DIAG_POP
+#endif
+
+#ifdef _MSC_VER
 RAPIDJSON_DIAG_POP
 #endif
 

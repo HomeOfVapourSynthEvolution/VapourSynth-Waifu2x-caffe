@@ -31,6 +31,11 @@ RAPIDJSON_DIAG_PUSH
 RAPIDJSON_DIAG_OFF(effc++)
 #endif
 
+#ifdef _MSC_VER
+RAPIDJSON_DIAG_PUSH
+RAPIDJSON_DIAG_OFF(4512) // assignment operator could not be generated
+#endif
+
 #ifndef RAPIDJSON_REGEX_VERBOSE
 #define RAPIDJSON_REGEX_VERBOSE 0
 #endif
@@ -256,13 +261,13 @@ private:
                 case '{':
                     {
                         unsigned n, m;
-                        if (!ParseUnsigned(ds, &n) || n == 0)
+                        if (!ParseUnsigned(ds, &n))
                             return;
 
                         if (ds.Peek() == ',') {
                             ds.Take();
                             if (ds.Peek() == '}')
-                                m = 0;
+                                m = kInfinityQuantifier;
                             else if (!ParseUnsigned(ds, &m) || m < n)
                                 return;
                         }
@@ -370,14 +375,14 @@ private:
     bool Eval(Stack<Allocator>& operandStack, Operator op) {
         switch (op) {
             case kConcatenation:
-                if (operandStack.GetSize() >= sizeof(Frag) * 2) {
+                RAPIDJSON_ASSERT(operandStack.GetSize() >= sizeof(Frag) * 2);
+                {
                     Frag e2 = *operandStack.template Pop<Frag>(1);
                     Frag e1 = *operandStack.template Pop<Frag>(1);
                     Patch(e1.out, e2.start);
                     *operandStack.template Push<Frag>() = Frag(e1.start, e2.out, Min(e1.minIndex, e2.minIndex));
-                    return true;
                 }
-                return false;
+                return true;
 
             case kAlternation:
                 if (operandStack.GetSize() >= sizeof(Frag) * 2) {
@@ -408,7 +413,8 @@ private:
                 }
                 return false;
 
-            case kOneOrMore:
+            default: 
+                RAPIDJSON_ASSERT(op == kOneOrMore);
                 if (operandStack.GetSize() >= sizeof(Frag)) {
                     Frag e = *operandStack.template Pop<Frag>(1);
                     SizeType s = NewState(kRegexInvalidState, e.start, 0);
@@ -417,22 +423,32 @@ private:
                     return true;
                 }
                 return false;
-
-            default:
-                return false;
         }
     }
 
     bool EvalQuantifier(Stack<Allocator>& operandStack, unsigned n, unsigned m) {
-        RAPIDJSON_ASSERT(n > 0);
-        RAPIDJSON_ASSERT(m == 0 || n <= m);         // m == 0 means infinity
-        if (operandStack.GetSize() < sizeof(Frag))
-            return false;
+        RAPIDJSON_ASSERT(n <= m);
+        RAPIDJSON_ASSERT(operandStack.GetSize() >= sizeof(Frag));
+
+        if (n == 0) {
+            if (m == 0)                             // a{0} not support
+                return false;
+            else if (m == kInfinityQuantifier)
+                Eval(operandStack, kZeroOrMore);    // a{0,} -> a*
+            else {
+                Eval(operandStack, kZeroOrOne);         // a{0,5} -> a?
+                for (unsigned i = 0; i < m - 1; i++)
+                    CloneTopOperand(operandStack);      // a{0,5} -> a? a? a? a? a?
+                for (unsigned i = 0; i < m - 1; i++)
+                    Eval(operandStack, kConcatenation); // a{0,5} -> a?a?a?a?a?
+            }
+            return true;
+        }
 
         for (unsigned i = 0; i < n - 1; i++)        // a{3} -> a a a
             CloneTopOperand(operandStack);
 
-        if (m == 0)
+        if (m == kInfinityQuantifier)
             Eval(operandStack, kOneOrMore);         // a{3,} -> a a a+
         else if (m > n) {
             CloneTopOperand(operandStack);          // a{3,5} -> a a a a
@@ -452,23 +468,25 @@ private:
     static SizeType Min(SizeType a, SizeType b) { return a < b ? a : b; }
 
     void CloneTopOperand(Stack<Allocator>& operandStack) {
-        const Frag *src = operandStack.template Top<Frag>();
-        SizeType count = stateCount_ - src->minIndex; // Assumes top operand contains states in [src->minIndex, stateCount_)
+        const Frag src = *operandStack.template Top<Frag>(); // Copy constructor to prevent invalidation
+        SizeType count = stateCount_ - src.minIndex; // Assumes top operand contains states in [src->minIndex, stateCount_)
         State* s = states_.template Push<State>(count);
-        memcpy(s, &GetState(src->minIndex), count * sizeof(State));
+        memcpy(s, &GetState(src.minIndex), count * sizeof(State));
         for (SizeType j = 0; j < count; j++) {
             if (s[j].out != kRegexInvalidState)
                 s[j].out += count;
             if (s[j].out1 != kRegexInvalidState)
                 s[j].out1 += count;
         }
-        *operandStack.template Push<Frag>() = Frag(src->start + count, src->out + count, src->minIndex + count);
+        *operandStack.template Push<Frag>() = Frag(src.start + count, src.out + count, src.minIndex + count);
         stateCount_ += count;
     }
 
     template <typename InputStream>
     bool ParseUnsigned(DecodedStream<InputStream>& ds, unsigned* u) {
         unsigned r = 0;
+        if (ds.Peek() < '0' || ds.Peek() > '9')
+            return false;
         while (ds.Peek() >= '0' && ds.Peek() <= '9') {
             if (r >= 429496729 && ds.Peek() > '5') // 2^32 - 1 = 4294967295
                 return false; // overflow
@@ -626,8 +644,7 @@ private:
 
     // Return whether the added states is a match state
     bool AddState(Stack<Allocator>& l, SizeType index) const {
-        if (index == kRegexInvalidState)
-            return true;
+        RAPIDJSON_ASSERT(index != kRegexInvalidState);
 
         const State& s = GetState(index);
         if (s.out1 != kRegexInvalidState) { // Split
@@ -658,6 +675,8 @@ private:
     SizeType stateCount_;
     SizeType rangeCount_;
 
+    static const unsigned kInfinityQuantifier = ~0u;
+
     // For SearchWithAnchoring()
     uint32_t* stateSet_;        // allocated by states_.GetAllocator()
     mutable Stack<Allocator> state0_;
@@ -672,6 +691,10 @@ typedef GenericRegex<UTF8<> > Regex;
 RAPIDJSON_NAMESPACE_END
 
 #ifdef __clang__
+RAPIDJSON_DIAG_POP
+#endif
+
+#ifdef _MSC_VER
 RAPIDJSON_DIAG_POP
 #endif
 

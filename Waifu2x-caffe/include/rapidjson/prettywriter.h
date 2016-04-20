@@ -24,6 +24,14 @@ RAPIDJSON_DIAG_OFF(effc++)
 
 RAPIDJSON_NAMESPACE_BEGIN
 
+//! Combination of PrettyWriter format flags.
+/*! \see PrettyWriter::SetFormatOptions
+ */
+enum PrettyFormatOptions {
+    kFormatDefault = 0,         //!< Default pretty formatting.
+    kFormatSingleLineArray = 1  //!< Format arrays on a single line.
+};
+
 //! Writer with indentation and spacing.
 /*!
     \tparam OutputStream Type of ouptut os.
@@ -43,7 +51,7 @@ public:
         \param levelDepth Initial capacity of stack.
     */
     explicit PrettyWriter(OutputStream& os, StackAllocator* allocator = 0, size_t levelDepth = Base::kDefaultLevelDepth) : 
-        Base(os, allocator, levelDepth), indentChar_(' '), indentCharCount_(4) {}
+        Base(os, allocator, levelDepth), indentChar_(' '), indentCharCount_(4), formatOptions_(kFormatDefault) {}
 
 
     explicit PrettyWriter(StackAllocator* allocator = 0, size_t levelDepth = Base::kDefaultLevelDepth) : 
@@ -61,6 +69,14 @@ public:
         return *this;
     }
 
+    //! Set pretty writer formatting options.
+    /*! \param options Formatting options.
+    */
+    PrettyWriter& SetFormatOptions(PrettyFormatOptions options) {
+        formatOptions_ = options;
+        return *this;
+    }
+
     /*! @name Implementation of Handler
         \see Handler
     */
@@ -73,6 +89,12 @@ public:
     bool Int64(int64_t i64)     { PrettyPrefix(kNumberType); return Base::WriteInt64(i64); }
     bool Uint64(uint64_t u64)   { PrettyPrefix(kNumberType); return Base::WriteUint64(u64);  }
     bool Double(double d)       { PrettyPrefix(kNumberType); return Base::WriteDouble(d); }
+
+    bool RawNumber(const Ch* str, SizeType length, bool copy = false) {
+        (void)copy;
+        PrettyPrefix(kNumberType);
+        return Base::WriteString(str, length);
+    }
 
     bool String(const Ch* str, SizeType length, bool copy = false) {
         (void)copy;
@@ -124,7 +146,7 @@ public:
         RAPIDJSON_ASSERT(Base::level_stack_.template Top<typename Base::Level>()->inArray);
         bool empty = Base::level_stack_.template Pop<typename Base::Level>(1)->valueCount == 0;
 
-        if (!empty) {
+        if (!empty && !(formatOptions_ & kFormatSingleLineArray)) {
             Base::os_->Put('\n');
             WriteIndent();
         }
@@ -146,6 +168,18 @@ public:
     bool Key(const Ch* str) { return Key(str, internal::StrLen(str)); }
 
     //@}
+
+    //! Write a raw JSON value.
+    /*!
+        For user to write a stringified JSON as a value.
+
+        \param json A well-formed JSON value. It should not contain null character within [0, length - 1] range.
+        \param length Length of the json.
+        \param type Type of the root of json.
+        \note When using PrettyWriter::RawValue(), the result json may not be indented correctly.
+    */
+    bool RawValue(const Ch* json, size_t length, Type type) { PrettyPrefix(type); return Base::WriteRawValue(json, length); }
+
 protected:
     void PrettyPrefix(Type type) {
         (void)type;
@@ -155,11 +189,14 @@ protected:
             if (level->inArray) {
                 if (level->valueCount > 0) {
                     Base::os_->Put(','); // add comma if it is not the first element in array
-                    Base::os_->Put('\n');
+                    if (formatOptions_ & kFormatSingleLineArray)
+                        Base::os_->Put(' ');
                 }
-                else
+
+                if (!(formatOptions_ & kFormatSingleLineArray)) {
                     Base::os_->Put('\n');
-                WriteIndent();
+                    WriteIndent();
+                }
             }
             else {  // in object
                 if (level->valueCount > 0) {
@@ -195,6 +232,7 @@ protected:
 
     Ch indentChar_;
     unsigned indentCharCount_;
+    PrettyFormatOptions formatOptions_;
 
 private:
     // Prohibit copy constructor & assignment operator.
