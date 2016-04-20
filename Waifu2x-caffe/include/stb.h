@@ -1,4 +1,4 @@
-/* stb.h - v2.26 - Sean's Tool Box -- public domain -- http://nothings.org/stb.h
+/* stb.h - v2.27 - Sean's Tool Box -- public domain -- http://nothings.org/stb.h
           no warranty is offered or implied; use this code at your own risk
 
    This is a single header file with a bunch of useful utilities
@@ -25,7 +25,8 @@
 
 Version History
 
-   2.26   various warning & buffixes
+   2.27   test _WIN32 not WIN32 in STB_THREADS
+   2.26   various warning & bugfixes
    2.25   various warning & bugfixes
    2.24   various warning & bugfixes
    2.23   fix 2.22
@@ -171,9 +172,9 @@ Parenthesized items have since been removed.
 
 LICENSE
 
-This software is in the public domain. Where that dedication is not
-recognized, you are granted a perpetual, irrevocable license to copy,
-distribute, and modify this file as you see fit.
+This software is dual-licensed to the public domain and under the following
+license: you are granted a perpetual, irrevocable license to copy, modify,
+publish, and distribute this file as you see fit.
 
 CREDITS
 
@@ -11205,7 +11206,7 @@ int  stb_arith_decode_byte(stb_arith *a)
 //                         Threads
 //
 
-#ifndef WIN32
+#ifndef _WIN32
 #ifdef STB_THREADS
 #error "threads not implemented except for Windows"
 #endif

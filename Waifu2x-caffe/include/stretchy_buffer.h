@@ -2,7 +2,7 @@
 // a vector<>-like dynamic array for C
 //
 // version history:
-//      1.02 -  compiles as C++, but untested
+//      1.02 -  tweaks to syntax for no good reason
 //      1.01 -  added a "common uses" documentation section
 //      1.0  -  fixed bug in the version I posted prematurely
 //      0.9  -  rewrite to try to avoid strict-aliasing optimization
@@ -164,9 +164,9 @@
 //
 // LICENSE
 //
-//   This software is in the public domain. Where that dedication is not
-//   recognized, you are granted a perpetual, irrevocable license to copy,
-//   distribute, and modify this file as you see fit.
+//   This software is dual-licensed to the public domain and under the following
+//   license: you are granted a perpetual, irrevocable license to copy, modify,
+//   publish, and distribute this file as you see fit.
 
 #ifndef STB_STRETCHY_BUFFER_H_INCLUDED
 #define STB_STRETCHY_BUFFER_H_INCLUDED

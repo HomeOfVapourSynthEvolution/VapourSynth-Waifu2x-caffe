@@ -1,4 +1,4 @@
-// stb_voxel_render.h - v0.83 - Sean Barrett, 2015 - public domain
+// stb_voxel_render.h - v0.84 - Sean Barrett, 2015 - public domain
 //
 // This library helps render large-scale "voxel" worlds for games,
 // in this case, one with blocks that can have textures and that
@@ -187,9 +187,11 @@
 //  Sean Barrett                          github:r-leyh   Jesus Fernandez
 //                                        Miguel Lechon   github:Arbeiterunfallversicherungsgesetz
 //                                        Thomas Frase    James Hofmann
+//                                        Stephen Olsen
 //
 // VERSION HISTORY
 //
+//   0.84   (2016-04-02)  fix GLSL syntax error on glModelView path
 //   0.83   (2015-09-13)  remove non-constant struct initializers to support more compilers
 //   0.82   (2015-08-01)  added input.packed_compact to store rot, vheight & texlerp efficiently
 //                        fix broken tex_overlay2
@@ -215,9 +217,9 @@
 //
 // LICENSE
 //
-//   This software is in the public domain. Where that dedication is not
-//   recognized, you are granted a perpetual, irrevocable license to copy,
-//   distribute, and modify this file as you see fit.
+//   This software is dual-licensed to the public domain and under the following
+//   license: you are granted a perpetual, irrevocable license to copy, modify,
+//   publish, and distribute this file as you see fit.
 
 #ifndef INCLUDE_STB_VOXEL_RENDER_H
 #define INCLUDE_STB_VOXEL_RENDER_H
@@ -1590,7 +1592,7 @@ static const char *stbvox_vertex_program =
       "uniform vec3 normal_table[32];\n"
 
       #ifndef STBVOX_CONFIG_OPENGL_MODELVIEW
-         "uniform mat44 model_view;\n"
+         "uniform mat4x4 model_view;\n"
       #endif
 
       // fragment output data
