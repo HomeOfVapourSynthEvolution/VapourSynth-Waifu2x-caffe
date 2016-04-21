@@ -278,7 +278,8 @@ static void VS_CC waifu2xCreate(const VSMap *in, VSMap *out, void *userData, VSC
     d.waifu2x = new Waifu2x();
     char * argv[] = { "" };
 
-    const Waifu2x::eWaifu2xError waifu2xError = d.waifu2x->init(1, argv, mode, noise, d.scale, modelPath, cudnn ? "cudnn" : "gpu", boost::optional<int>(), 32, tta, block, 1);
+    const Waifu2x::eWaifu2xError waifu2xError =
+        d.waifu2x->init(1, argv, mode, noise, d.scale, boost::optional<int>(), boost::optional<int>(), modelPath, cudnn ? "cudnn" : "gpu", boost::optional<int>(), 32, tta, block, 1);
     if (waifu2xError != Waifu2x::eWaifu2xError_OK) {
         const char * err;
 
