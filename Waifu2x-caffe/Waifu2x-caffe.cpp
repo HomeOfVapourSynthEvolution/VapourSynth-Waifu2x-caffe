@@ -201,8 +201,8 @@ static void VS_CC waifu2xCreate(const VSMap *in, VSMap *out, void *userData, VSC
 
     const bool tta = !!vsapi->propGetInt(in, "tta", 0, &err);
 
-    if (noise < 0 || noise > 2) {
-        vsapi->setError(out, "Waifu2x-caffe: noise must be set to 0, 1 or 2");
+    if (noise < 0 || noise > 3) {
+        vsapi->setError(out, "Waifu2x-caffe: noise must be 0, 1, 2 or 3");
         return;
     }
 

@@ -21,8 +21,9 @@ Usage
 
 * noise: Noise reduction level.
   * 0 = none
-  * 1 = low
+  * 1 = medium
   * 2 = high
+  * 3 = highest
 
 * scale: Upscaling factor. Must be a power of 2. Set to 1 for no upscaling.
 
