@@ -16,6 +16,7 @@
 #include <google/protobuf/io/zero_copy_stream_impl.h>
 #include <google/protobuf/text_format.h>
 #include <fcntl.h>
+#include <zlib.h>
 #ifdef _MSC_VER
 #include <io.h>
 #endif
@@ -405,7 +406,14 @@ Waifu2x::eWaifu2xCudaError Waifu2x::can_use_CUDA()
 				if (cudaRuntimeGetVersion(&runtimeVersion) == cudaSuccess)
 				{
 					if (runtimeVersion >= MinCudaDriverVersion && driverVersion >= runtimeVersion)
-						CudaFlag = eWaifu2xCudaError_OK;
+					{
+						cudaDeviceProp prop;
+						cudaGetDeviceProperties(&prop, 0);
+						if (prop.major >= 2)
+							CudaFlag = eWaifu2xCudaError_OK;
+						else
+							CudaFlag = eWaifu2xCudaError_OldDevice;
+					}
 					else
 						CudaFlag = eWaifu2xCudaError_OldVersion;
 				}
@@ -654,10 +662,9 @@ Waifu2x::eWaifu2xError Waifu2x::Zoom2xAndPaddingImage(const cv::Mat &input, cv::
 	zoom_size.width *= 2;
 	zoom_size.height *= 2;
 
-	cv::Mat zoom_image;
-	cv::resize(input, zoom_image, zoom_size, 0.0, 0.0, cv::INTER_NEAREST);
+	cv::resize(input, output, zoom_size, 0.0, 0.0, cv::INTER_NEAREST);
 
-	return PaddingImage(zoom_image, output);
+	return PaddingImage(output, output);
 }
 
 // 入力画像をzoom_sizeの大きさにcv::INTER_CUBICで拡大し、色情報のみを残す
@@ -708,7 +715,7 @@ Waifu2x::eWaifu2xError Waifu2x::ConstractNet(boost::shared_ptr<caffe::Net<float>
 		net = boost::shared_ptr<caffe::Net<float>>(new caffe::Net<float>(param_model));
 		net->CopyTrainedLayersFrom(param_caffemodel);
 
-		input_plane = param_model.input_dim(1);
+		input_plane = param_model.layer(0).input_param().shape().Get(0).dim(1);
 	}
 	else
 	{
@@ -725,14 +732,13 @@ Waifu2x::eWaifu2xError Waifu2x::SetParameter(caffe::NetParameter &param, const s
 	param.mutable_state()->set_phase(caffe::TEST);
 
 	{
-		auto mid = param.mutable_input_dim();
-
-		if (mid->size() != 4)
+		auto input_layer = param.mutable_layer(0);
+		auto mid = input_layer->mutable_input_param()->mutable_shape();
+		if (mid->size() != 1 || mid->Mutable(0)->dim_size() != 4)
 			return eWaifu2xError_FailedParseModelFile;
-
-		*mid->Mutable(0) = batch_size;
-		*mid->Mutable(2) = input_block_size;
-		*mid->Mutable(3) = input_block_size;
+		mid->Mutable(0)->set_dim(0, batch_size);
+		mid->Mutable(0)->set_dim(2, input_block_size);
+		mid->Mutable(0)->set_dim(3, input_block_size);
 	}
 
 	for (int i = 0; i < param.layer_size(); i++)
@@ -1615,7 +1621,7 @@ Waifu2x::eWaifu2xError Waifu2x::Reconstruct(const bool isReconstructNoise, const
 	return eWaifu2xError_OK;
 }
 
-Waifu2x::eWaifu2xError Waifu2x::AfterReconstructFloatMatProcess(const bool isReconstructScale, const waifu2xCancelFunc cancel_func, const cv::Mat &floatim, const cv::Mat &in, cv::Mat &out)
+Waifu2x::eWaifu2xError Waifu2x::AfterReconstructFloatMatProcess(const bool isReconstructScale, const waifu2xCancelFunc cancel_func, const cv::Mat &floatim, cv::Mat &in, cv::Mat &out)
 {
 	cv::Size_<int> image_size = in.size();
 
@@ -1628,6 +1634,7 @@ Waifu2x::eWaifu2xError Waifu2x::AfterReconstructFloatMatProcess(const bool isRec
 		CreateZoomColorImage(floatim, image_size, color_planes);
 
 		color_planes[0] = in;
+		in.release();
 
 		cv::Mat converted_image;
 		cv::merge(color_planes, converted_image);
@@ -1640,6 +1647,7 @@ Waifu2x::eWaifu2xError Waifu2x::AfterReconstructFloatMatProcess(const bool isRec
 	{
 		std::vector<cv::Mat> planes;
 		cv::split(in, planes);
+		in.release();
 
 		// RGBからBGRに直す
 		std::swap(planes[0], planes[2]);
@@ -1651,16 +1659,200 @@ Waifu2x::eWaifu2xError Waifu2x::AfterReconstructFloatMatProcess(const bool isRec
 	const int scale2 = ceil(log2(ratio));
 	const double shrinkRatio = ratio >= 1.0 ? ratio / std::pow(2.0, (double)scale2) : ratio;
 
+	if (isReconstructScale)
+	{
+		const cv::Size_<int> ns(image_size.width * shrinkRatio, image_size.height * shrinkRatio);
+		if (image_size.width != ns.width || image_size.height != ns.height)
+		{
+			int argo = cv::INTER_CUBIC;
+			if (ratio < 0.5)
+				argo = cv::INTER_AREA;
+
+			cv::resize(process_image, process_image, ns, 0.0, 0.0, argo);
+		}
+	}
+
 	cv::Mat alpha;
 	if (floatim.channels() == 4)
 	{
 		std::vector<cv::Mat> planes;
 		cv::split(floatim, planes);
 
+		alpha = planes[3];
+		planes.clear();
+
 		if (isReconstructScale)
-			Reconstruct(false, true, cancel_func, planes[3], alpha);
-		else
-			alpha = planes[3];
+		{
+			const auto memSize = process_image.step1() * process_image.elemSize1() * process_image.size().height;
+
+			if (memSize < 3ULL * 1000ULL * 1000ULL * 1000ULL) // 拡大後のサイズが3GB超えていたらファイルに書き出してメモリ不足対策
+				Reconstruct(false, true, cancel_func, alpha, alpha);
+			else
+			{
+				boost::filesystem::path temp = boost::filesystem::unique_path("%%%%-%%%%-%%%%-%%%%.bin");
+
+				auto compp = [](const cv::Mat &im, const boost::filesystem::path &temp)
+				{
+					static char outbuf[10240000];
+					FILE *fout;
+					z_stream z;
+					int count;
+
+					if (!(fout = fopen(temp.string().c_str(), "wb")))
+						return false;
+
+					z.zalloc = Z_NULL;
+					z.zfree = Z_NULL;
+					z.opaque = Z_NULL;
+
+					if (deflateInit(&z, Z_DEFAULT_COMPRESSION) != Z_OK)
+					{
+						fclose(fout);
+						return false;
+					}
+
+					z.next_in = (z_const Bytef *)im.data;
+					z.avail_in = im.step1() * im.elemSize1() * im.size().height;
+					z.next_out = (Bytef *)outbuf;
+					z.avail_out = sizeof(outbuf);
+
+					for(;;)
+					{
+						const int status = deflate(&z, Z_FINISH);
+						if (status == Z_STREAM_END)
+							break; // 完了
+
+						if (status != Z_OK)
+						{
+							fclose(fout);
+							return false;
+						}
+
+						if (z.avail_out == 0)
+						{
+							if (fwrite(outbuf, 1, sizeof(outbuf), fout) != sizeof(outbuf))
+							{
+								fclose(fout);
+								return false;
+							}
+							z.next_out = (Bytef *)outbuf; // 出力バッファ残量を元に戻す
+							z.avail_out = sizeof(outbuf); // 出力ポインタを元に戻す
+						}
+					}
+
+					// 残りを吐き出す
+					if ((count = sizeof(outbuf) - z.avail_out) != 0)
+					{
+						if (fwrite(outbuf, 1, count, fout) != count)
+						{
+							fclose(fout);
+							return false;
+						}
+					}
+
+					// 後始末
+					if (deflateEnd(&z) != Z_OK)
+					{
+						fclose(fout);
+						return false;
+					}
+
+					fclose(fout);
+
+					return true;
+				};
+
+				auto decompp = [](const cv::Size &size, const int type, cv::Mat &out, const boost::filesystem::path &temp)
+				{
+					static char inbuf[102400];
+					FILE *fin;
+					z_stream z;
+
+					if (!(fin = fopen(temp.string().c_str(), "rb")))
+						return false;
+
+					z.zalloc = Z_NULL;
+					z.zfree = Z_NULL;
+					z.opaque = Z_NULL;
+
+					z.next_in = Z_NULL;
+					z.avail_in = 0;
+					if (inflateInit(&z) != Z_OK)
+					{
+						fclose(fin);
+						return false;
+					}
+
+					out = cv::Mat(size, type);
+
+					const int MaxSize = out.step1() * out.elemSize1() * out.size().height;
+					z.next_out = (Bytef *)out.data;            // 出力ポインタ
+					z.avail_out = MaxSize;        // 出力バッファ残量
+
+					for(;;)
+					{
+						if (z.avail_in == 0)
+						{
+							z.next_in = (Bytef *)inbuf;
+							z.avail_in = fread(inbuf, 1, sizeof(inbuf), fin);
+						}
+
+						const int status = inflate(&z, Z_NO_FLUSH);
+						if (status == Z_STREAM_END)
+							break;
+
+						if (status != Z_OK)
+						{
+							fclose(fin);
+							return false;
+						}
+
+						if (z.avail_out == 0)
+						{
+							fclose(fin);
+							return false;
+						}
+					}
+
+					if (inflateEnd(&z) != Z_OK)
+					{
+						fclose(fin);
+						return false;
+					}
+
+					fclose(fin);
+
+					return true;
+				};
+
+				const auto step1Old = process_image.step1();
+				const auto size = process_image.size();
+				const auto type = process_image.type();
+				compp(process_image, temp);
+				process_image.release();
+
+				Reconstruct(false, true, cancel_func, alpha, alpha);
+
+				decompp(size, type, process_image, temp);
+				boost::filesystem::remove(temp);
+
+				assert(step1Old == process_image.step1());
+			}
+		}
+	}
+
+	if (isReconstructScale)
+	{
+		const cv::Size_<int> ns(image_size.width * shrinkRatio, image_size.height * shrinkRatio);
+		if (image_size.width != ns.width || image_size.height != ns.height)
+		{
+			int argo = cv::INTER_CUBIC;
+			if (ratio < 0.5)
+				argo = cv::INTER_AREA;
+
+			if (!alpha.empty())
+				cv::resize(alpha, alpha, ns, 0.0, 0.0, argo);
+		}
 	}
 
 	// アルファチャンネルがあったらアルファを付加する
@@ -1671,21 +1863,9 @@ Waifu2x::eWaifu2xError Waifu2x::AfterReconstructFloatMatProcess(const bool isRec
 		process_image.release();
 
 		planes.push_back(alpha);
+		alpha.release();
 
 		cv::merge(planes, process_image);
-	}
-
-	if (isReconstructScale)
-	{
-		const cv::Size_<int> ns(image_size.width * shrinkRatio, image_size.height * shrinkRatio);
-		if (image_size.width != ns.width || image_size.height != ns.height)
-		{
-			int argo = cv::INTER_CUBIC;
-			if(ratio < 0.5)
-				argo = cv::INTER_AREA;
-
-			cv::resize(process_image, process_image, ns, 0.0, 0.0, argo);
-		}
 	}
 
 	// 値を0～1にクリッピング
@@ -1695,6 +1875,36 @@ Waifu2x::eWaifu2xError Waifu2x::AfterReconstructFloatMatProcess(const bool isRec
 	out = process_image;
 
 	return eWaifu2xError_OK;
+}
+
+namespace
+{
+	template<typename T>
+	void AlphaZeroToZero(std::vector<cv::Mat> &planes)
+	{
+		cv::Mat alpha(planes[3]);
+
+		const T *aptr = (const T *)alpha.data;
+
+		T *ptr0 = (T *)planes[0].data;
+		T *ptr1 = (T *)planes[1].data;
+		T *ptr2 = (T *)planes[2].data;
+
+		const size_t Line = alpha.step1();
+		const size_t Width = alpha.size().width;
+		const size_t Height = alpha.size().height;
+
+		for (size_t i = 0; i < Height; i++)
+		{
+			for (size_t j = 0; j < Width; j++)
+			{
+				const size_t pos = Line * i + j;
+
+				if (aptr[pos] == (T)0)
+					ptr0[pos] = ptr1[pos] = ptr2[pos] = (T)0;
+			}
+		}
+	}
 }
 
 Waifu2x::eWaifu2xError Waifu2x::waifu2xConvetedMat(const bool isJpeg, const cv::Mat &inMat, cv::Mat &outMat, const waifu2xCancelFunc cancel_func)
@@ -1729,18 +1939,35 @@ Waifu2x::eWaifu2xError Waifu2x::waifu2xConvetedMat(const bool isJpeg, const cv::
 	// 完全透明のピクセルの色を消す(処理の都合上、完全透明のピクセルにも色を付けたから)
 	// モデルによっては画像全域の完全透明の場所にごく小さい値のアルファが広がることがある。それを消すためにcv_depthへ変換してからこの処理を行うことにした
 	// (ただしcv_depthが32の場合だと意味は無いが)
+	// TODO: モデル(例えばPhoto)によっては0しかない画像を変換しても0.000114856390とかになるので、適切な値のクリッピングを行う？
 	if (write_iamge.channels() > 3)
 	{
 		std::vector<cv::Mat> planes;
 		cv::split(write_iamge, planes);
+		write_iamge.release();
 
-		cv::Mat mask;
-		cv::threshold(planes[3], mask, 0.0, 1.0, cv::THRESH_BINARY); // アルファチャンネルを二値化してマスクとして扱う
+		const auto depth = planes[0].depth();
+		switch (depth)
+		{
+		case CV_8U:
+			AlphaZeroToZero<uint8_t>(planes);
+			break;
 
-		// アルファチャンネルが0のところの色を消す
-		planes[0] = planes[0].mul(mask);
-		planes[1] = planes[1].mul(mask);
-		planes[2] = planes[2].mul(mask);
+		case CV_16U:
+			AlphaZeroToZero<uint16_t>(planes);
+			break;
+
+		case CV_32F:
+			AlphaZeroToZero<float>(planes);
+			break;
+
+		case CV_64F:
+			AlphaZeroToZero<double>(planes);
+			break;
+
+		default:
+			return eWaifu2xError_FailedUnknownType;
+		}
 
 		cv::merge(planes, write_iamge);
 	}

@@ -10,8 +10,8 @@
 #include <boost/optional.hpp>
 #include <opencv2/opencv.hpp>
 
-#define CUDNN_DLL_NAME "cudnn64_4.dll"
-#define CUDNN_REQUIRE_VERION_TEXT "v4 RC"
+#define CUDNN_DLL_NAME "cudnn64_5.dll"
+#define CUDNN_REQUIRE_VERION_TEXT "v5 RC"
 
 
 namespace caffe
@@ -38,6 +38,7 @@ public:
 		eWaifu2xError_FailedConstructModel,
 		eWaifu2xError_FailedProcessCaffe,
 		eWaifu2xError_FailedCudaCheck,
+		eWaifu2xError_FailedUnknownType,
 	};
 
 	enum eWaifu2xCudaError
@@ -45,6 +46,7 @@ public:
 		eWaifu2xCudaError_OK = 0,
 		eWaifu2xCudaError_NotFind,
 		eWaifu2xCudaError_OldVersion,
+		eWaifu2xCudaError_OldDevice,
 	};
 
 	enum eWaifu2xcuDNNError
@@ -133,7 +135,7 @@ private:
 	eWaifu2xError BeforeReconstructFloatMatProcess(const cv::Mat &in, cv::Mat &out, bool &convertBGRflag);
 	eWaifu2xError ReconstructFloatMat(const bool isReconstructNoise, const bool isReconstructScale, const waifu2xCancelFunc cancel_func, const cv::Mat &in, cv::Mat &out);
 	eWaifu2xError Reconstruct(const bool isReconstructNoise, const bool isReconstructScale, const waifu2xCancelFunc cancel_func, const cv::Mat &in, cv::Mat &out);
-	eWaifu2xError AfterReconstructFloatMatProcess(const bool isReconstructScale, const waifu2xCancelFunc cancel_func, const cv::Mat &floatim, const cv::Mat &in, cv::Mat &out);
+	eWaifu2xError AfterReconstructFloatMatProcess(const bool isReconstructScale, const waifu2xCancelFunc cancel_func, const cv::Mat &floatim, cv::Mat &in, cv::Mat &out);
 
 	eWaifu2xError waifu2xConvetedMat(const bool isJpeg, const cv::Mat &inMat, cv::Mat &outMat,
 		const waifu2xCancelFunc cancel_func = nullptr);
