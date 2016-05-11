@@ -56,11 +56,12 @@ static Waifu2x::eWaifu2xError Process(const VSFrameRef * src, VSFrameRef * dst, 
 
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
-                const int pos = y * width + x;
+                const int pos = width * y + x;
                 d->srcInterleaved[pos * 3] = srcpR[x];
                 d->srcInterleaved[pos * 3 + 1] = srcpG[x];
                 d->srcInterleaved[pos * 3 + 2] = srcpB[x];
             }
+
             srcpR += srcStride;
             srcpG += srcStride;
             srcpB += srcStride;
@@ -73,11 +74,12 @@ static Waifu2x::eWaifu2xError Process(const VSFrameRef * src, VSFrameRef * dst, 
 
         for (int y = 0; y < d->vi.height; y++) {
             for (int x = 0; x < d->vi.width; x++) {
-                const int pos = y * d->vi.width + x;
+                const int pos = d->vi.width * y + x;
                 dstpR[x] = d->dstInterleaved[pos * 3];
                 dstpG[x] = d->dstInterleaved[pos * 3 + 1];
                 dstpB[x] = d->dstInterleaved[pos * 3 + 2];
             }
+
             dstpR += dstStride;
             dstpG += dstStride;
             dstpB += dstStride;
@@ -104,6 +106,7 @@ static Waifu2x::eWaifu2xError Process(const VSFrameRef * src, VSFrameRef * dst, 
                 for (int y = 0; y < srcHeight; y++) {
                     for (int x = 0; x < srcWidth; x++)
                         output[x] = input[x] + 0.5f;
+
                     input += srcStride;
                     output += srcWidth;
                 }
@@ -113,6 +116,7 @@ static Waifu2x::eWaifu2xError Process(const VSFrameRef * src, VSFrameRef * dst, 
                 for (int y = 0; y < dstHeight; y++) {
                     for (int x = 0; x < dstWidth; x++)
                         dstp[x] -= 0.5f;
+
                     dstp += dstStride;
                 }
             }
@@ -169,10 +173,13 @@ static const VSFrameRef *VS_CC waifu2xGetFrame(int n, int activationReason, void
 
 static void VS_CC waifu2xFree(void *instanceData, VSCore *core, const VSAPI *vsapi) {
     Waifu2xData * d = static_cast<Waifu2xData *>(instanceData);
+
     vsapi->freeNode(d->node);
+
     vs_aligned_free(d->srcInterleaved);
     vs_aligned_free(d->dstInterleaved);
     vs_aligned_free(d->buffer);
+
     delete d->waifu2x;
     delete d;
 }
@@ -233,7 +240,7 @@ static void VS_CC waifu2xCreate(const VSMap *in, VSMap *out, void *userData, VSC
 
     VSPlugin * fmtcPlugin = vsapi->getPluginById("fmtconv", core);
     if (d.scale != 1 && d.vi.format->subSamplingW != 0 && !fmtcPlugin) {
-        vsapi->setError(out, "Waifu2x-caffe: the fmtconv plugin is required for fixing horizontal chroma shift");
+        vsapi->setError(out, "Waifu2x-caffe: the fmtconv plugin is required for correcting the horizontal chroma shift");
         vsapi->freeNode(d.node);
         return;
     }
@@ -262,7 +269,7 @@ static void VS_CC waifu2xCreate(const VSMap *in, VSMap *out, void *userData, VSC
         }
     }
 
-    const char * mode = (d.scale == 1) ? "noise" : ((noise == 0) ? "scale" : "noise_scale");
+    const char * mode = (d.scale == 1) ? "noise" : (noise == 0 ? "scale" : "noise_scale");
 
     const std::string pluginPath(vsapi->getPluginPath(vsapi->getPluginById("com.holywu.waifu2x-caffe", core)));
     std::string modelPath(pluginPath.substr(0, pluginPath.find_last_of('/')));
