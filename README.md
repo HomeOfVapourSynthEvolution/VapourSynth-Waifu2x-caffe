@@ -9,7 +9,7 @@ Note
 
 The folder `models` must be located in the same folder as `Waifu2x-caffe.dll`.
 
-Due to the license of cuDNN, I can't distribute the required dll file. You have to register and download yourself at https://developer.nvidia.com/cudnn.
+Requires cudnn64_5.dll (v5 RC) to be in the search path. Due to the license of cuDNN, I can't distribute the required dll file. You have to register and download yourself at https://developer.nvidia.com/cudnn.
 
 
 Usage
