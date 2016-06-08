@@ -8,10 +8,10 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/optional.hpp>
-#include <opencv2/opencv.hpp>
+#include <opencv2/core.hpp>
 
 #define CUDNN_DLL_NAME "cudnn64_5.dll"
-#define CUDNN_REQUIRE_VERION_TEXT "v5 RC"
+#define CUDNN_REQUIRE_VERION_TEXT "v5"
 
 
 namespace caffe
@@ -117,6 +117,8 @@ private:
 	boost::optional<int> output_quality;
 	int output_depth;
 
+	int gpu_no;
+
 private:
 	static eWaifu2xError LoadMat(cv::Mat &float_image, const boost::filesystem::path &input_file);
 	static eWaifu2xError LoadMatBySTBI(cv::Mat &float_image, const std::vector<char> &img_data);
@@ -162,7 +164,7 @@ public:
 		const boost::optional<double> scale_ratio, const boost::optional<int> scale_width, const boost::optional<int> scale_height,
 		const boost::filesystem::path &model_dir, const std::string &process,
 		const boost::optional<int> output_quality = boost::optional<int>(), const int output_depth = 8, const bool use_tta = false,
-		const int crop_size = 128, const int batch_size = 1);
+		const int crop_size = 128, const int batch_size = 1, const int gpu_no = 0);
 
 	void destroy();
 

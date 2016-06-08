@@ -41,7 +41,7 @@ static inline bool isPowerOf2(const int i) {
     return i && !(i & (i - 1));
 }
 
-static Waifu2x::eWaifu2xError Process(const VSFrameRef * src, VSFrameRef * dst, Waifu2xData * VS_RESTRICT d, const VSAPI * vsapi) {
+static Waifu2x::eWaifu2xError process(const VSFrameRef * src, VSFrameRef * dst, Waifu2xData * VS_RESTRICT d, const VSAPI * vsapi) {
     if (d->vi.format->colorFamily == cmRGB) {
         const int width = vsapi->getFrameWidth(src, 0);
         const int height = vsapi->getFrameHeight(src, 0);
@@ -145,7 +145,7 @@ static const VSFrameRef *VS_CC waifu2xGetFrame(int n, int activationReason, void
         const VSFrameRef * src = vsapi->getFrameFilter(n, d->node, frameCtx);
         VSFrameRef * dst = vsapi->newVideoFrame(d->vi.format, d->vi.width, d->vi.height, src, core);
 
-        const Waifu2x::eWaifu2xError waifu2xError = Process(src, dst, d, vsapi);
+        const Waifu2x::eWaifu2xError waifu2xError = process(src, dst, d, vsapi);
         if (waifu2xError != Waifu2x::eWaifu2xError_OK) {
             const char * err;
 
@@ -206,6 +206,8 @@ static void VS_CC waifu2xCreate(const VSMap *in, VSMap *out, void *userData, VSC
     if (err)
         cudnn = true;
 
+    const int processor = int64ToIntS(vsapi->propGetInt(in, "processor", 0, &err));
+
     const bool tta = !!vsapi->propGetInt(in, "tta", 0, &err);
 
     if (noise < 0 || noise > 3) {
@@ -220,6 +222,11 @@ static void VS_CC waifu2xCreate(const VSMap *in, VSMap *out, void *userData, VSC
 
     if (block < 1) {
         vsapi->setError(out, "Waifu2x-caffe: block must be greater than or equal to 1");
+        return;
+    }
+
+    if (processor < 0) {
+        vsapi->setError(out, "Waifu2x-caffe: processor must be greater than or equal to 0");
         return;
     }
 
@@ -286,7 +293,7 @@ static void VS_CC waifu2xCreate(const VSMap *in, VSMap *out, void *userData, VSC
     char * argv[] = { "" };
 
     const Waifu2x::eWaifu2xError waifu2xError =
-        d.waifu2x->init(1, argv, mode, noise, d.scale, boost::optional<int>(), boost::optional<int>(), modelPath, cudnn ? "cudnn" : "gpu", boost::optional<int>(), 32, tta, block, 1);
+        d.waifu2x->init(1, argv, mode, noise, d.scale, boost::optional<int>(), boost::optional<int>(), modelPath, cudnn ? "cudnn" : "gpu", boost::optional<int>(), 32, tta, block, 1, processor);
     if (waifu2xError != Waifu2x::eWaifu2xError_OK) {
         const char * err;
 
@@ -304,7 +311,7 @@ static void VS_CC waifu2xCreate(const VSMap *in, VSMap *out, void *userData, VSC
             err = "failed construct model";
             break;
         case Waifu2x::eWaifu2xError_FailedCudaCheck:
-            err = "failed cuda check";
+            err = "failed CUDA check";
             break;
         }
 
@@ -362,6 +369,7 @@ VS_EXTERNAL_API(void) VapourSynthPluginInit(VSConfigPlugin configFunc, VSRegiste
                  "block:int:opt;"
                  "photo:int:opt;"
                  "cudnn:int:opt;"
+                 "processor:int:opt;"
                  "tta:int:opt;",
                  waifu2xCreate, nullptr, plugin);
 }

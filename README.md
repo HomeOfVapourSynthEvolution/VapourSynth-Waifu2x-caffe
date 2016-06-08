@@ -15,7 +15,7 @@ Requires `cudnn64_5.dll` (cuDNN v5) to be in the search path. Due to the license
 Usage
 =====
 
-    caffe.Waifu2x(clip clip[, int noise=1, int scale=2, int block=128, bint photo=False, bint cudnn=True, bint tta=False])
+    caffe.Waifu2x(clip clip[, int noise=1, int scale=2, int block=128, bint photo=False, bint cudnn=True, int processor=0, bint tta=False])
 
 * clip: The input clip. Must be 32-bit floating point. Any planar color family is supported.
 
@@ -32,6 +32,8 @@ Usage
 * photo: When set to true, it uses the photo model. When set to false, the anime-style model will be used instead. There are two sets of anime-style models, one is trained under RGB, the other is trained under Y (luma only). The RGB model will be used when the color family of the input is RGB, and the Y model will be used for all the other color family. Note that the photo model is only available for RGB, so this parameter has no effect for non-RGB input.
 
 * cudnn: When set to true, it uses cuDNN as processor. When set to false, CUDA will be used instead.
+
+* processor: Specifies which GPU device to use. The device number begins with 0. The default device will be used if a nonexistent device is specified.
 
 * tta: Whether TTA(Test-Time Augmentation) mode is used. It increases PSNR by 0.15 or so, but 8 times slower.
 
