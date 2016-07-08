@@ -31,12 +31,12 @@ Usage
 
 * block_h: The same as `block_w` but for vertical.
 
-* model: Specifies which model to use.
-  * 0 = anime_style_art
-  * 1 = anime_style_art_rgb
-  * 2 = photo
-  * 3 = upconv_7_anime_style_art_rgb
-  * 4 = upconv_7_photo
+* model: Specifies which model to use. Only `anime_style_art` is Y model (luma only), the others are RGB models.
+  * 0 = anime_style_art (for 2D illustration)
+  * 1 = anime_style_art_rgb (for 2D illustration)
+  * 2 = photo (for photo and anime)
+  * 3 = upconv_7_anime_style_art_rgb (has much faster speed and slightly higher memory consumption than `anime_style_art_rgb`, with similar or probably better quality)
+  * 4 = upconv_7_photo (has much faster speed and slightly higher memory consumption than `photo`, with similar or probably better quality)
 
 * cudnn: When set to true, it uses cuDNN for processing. When set to false, CUDA will be used instead.
 
