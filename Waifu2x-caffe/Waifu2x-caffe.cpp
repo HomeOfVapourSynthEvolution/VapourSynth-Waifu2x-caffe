@@ -184,10 +184,10 @@ static void VS_CC waifu2xFree(void *instanceData, VSCore *core, const VSAPI *vsa
 }
 
 static void VS_CC waifu2xCreate(const VSMap *in, VSMap *out, void *userData, VSCore *core, const VSAPI *vsapi) {
-    char * argv[] = { "" };
+    char * argv[] { "" };
     Waifu2x::init_liblary(1, argv);
 
-    Waifu2xData d = {};
+    Waifu2xData d {};
     int err;
 
     int noise = int64ToIntS(vsapi->propGetInt(in, "noise", 0, &err));
@@ -297,8 +297,8 @@ static void VS_CC waifu2xCreate(const VSMap *in, VSMap *out, void *userData, VSC
     const Waifu2x::eWaifu2xModelType waifu2xModelType =
         (d.scale == 1) ? Waifu2x::eWaifu2xModelTypeNoise : (noise == 0 ? Waifu2x::eWaifu2xModelTypeScale : Waifu2x::eWaifu2xModelTypeNoiseScale);
 
-    const std::string pluginPath(vsapi->getPluginPath(vsapi->getPluginById("com.holywu.waifu2x-caffe", core)));
-    std::string modelPath(pluginPath.substr(0, pluginPath.find_last_of('/')));
+    const std::string pluginPath { vsapi->getPluginPath(vsapi->getPluginById("com.holywu.waifu2x-caffe", core)) };
+    std::string modelPath { pluginPath.substr(0, pluginPath.find_last_of('/')) };
     if (model == 0)
         modelPath += "/models/anime_style_art";
     else if (model == 1)
@@ -310,7 +310,7 @@ static void VS_CC waifu2xCreate(const VSMap *in, VSMap *out, void *userData, VSC
     else
         modelPath += "/models/upconv_7_photo";
 
-    d.waifu2x = new Waifu2x();
+    d.waifu2x = new Waifu2x;
 
     const Waifu2x::eWaifu2xError waifu2xError = d.waifu2x->Init(waifu2xModelType, noise, modelPath, cudnn ? "cudnn" : "gpu", processor);
     if (waifu2xError != Waifu2x::eWaifu2xError_OK) {
@@ -333,7 +333,7 @@ static void VS_CC waifu2xCreate(const VSMap *in, VSMap *out, void *userData, VSC
         return;
     }
 
-    Waifu2xData * data = new Waifu2xData(d);
+    Waifu2xData * data = new Waifu2xData { d };
 
     vsapi->createFilter(in, out, "Waifu2x-caffe", waifu2xInit, waifu2xGetFrame, waifu2xFree, fmParallelRequests, 0, data, core);
 
