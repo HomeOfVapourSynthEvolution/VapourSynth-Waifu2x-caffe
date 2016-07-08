@@ -5,6 +5,7 @@
 #include <cudnn.h>
 #include <mutex>
 #include <opencv2/core.hpp>
+#include <opencv2/imgproc.hpp>
 #include <tclap/CmdLine.h>
 #include <boost/filesystem.hpp>
 #include <boost/algorithm/string.hpp>
@@ -787,6 +788,18 @@ Waifu2x::eWaifu2xError Waifu2x::waifu2x(const double factor, const void* source,
 	if (!mIsInited)
 		return Waifu2x::eWaifu2xError_NotInitialized;
 
+	int cvrSetting = -1;
+	if (in_channel == 3 && out_channel == 3)
+		cvrSetting = CV_BGR2RGB;
+	else if (in_channel == 4 && out_channel == 4)
+		cvrSetting = CV_BGRA2RGBA;
+	else if (in_channel == 3 && out_channel == 4)
+		cvrSetting = CV_BGR2RGBA;
+	else if (in_channel == 4 && out_channel == 3)
+		cvrSetting = CV_BGRA2RGB;
+	else if (!(in_channel == 1 && out_channel == 1))
+		return Waifu2x::eWaifu2xError_InvalidParameter;
+
 	stImage image;
 	ret = image.Load(source, width, height, in_channel, in_stride);
 	if (ret != Waifu2x::eWaifu2xError_OK)
@@ -808,8 +821,15 @@ Waifu2x::eWaifu2xError Waifu2x::waifu2x(const double factor, const void* source,
 
 	image.Postprocess(mInputPlane, Factor, 32);
 
-	cv::Mat out_image = image.GetEndImage();
+	cv::Mat out_bgr_image = image.GetEndImage();
 	image.Clear();
+
+	cv::Mat out_image;
+	if (cvrSetting >= 0)
+		cv::cvtColor(out_bgr_image, out_image, cvrSetting); // BGRからRGBに戻す
+	else
+		out_image = out_bgr_image;
+	out_bgr_image.release();
 
 	// 出力配列へ書き込み
 	{
@@ -832,7 +852,7 @@ double Waifu2x::CalcScaleRatio(const boost::optional<double> scale_ratio, const 
 		return image.GetScaleFromWidth(*scale_width);
 
 	if(scale_height)
-		return image.GetScaleFromWidth(*scale_height);
+		return image.GetScaleFromHeight(*scale_height);
 
 	return 1.0;
 }
