@@ -32,7 +32,8 @@
 struct Waifu2xData {
     VSNodeRef * node;
     VSVideoInfo vi;
-    int scale;
+    int scale, blockWidth, blockHeight;
+    bool tta;
     float * srcInterleaved, * dstInterleaved, * buffer;
     Waifu2x * waifu2x;
 };
@@ -68,7 +69,7 @@ static Waifu2x::eWaifu2xError process(const VSFrameRef * src, VSFrameRef * dst, 
         }
 
         const Waifu2x::eWaifu2xError waifu2xError =
-            d->waifu2x->waifu2x(d->scale, d->srcInterleaved, d->dstInterleaved, width, height, 3, width * 3 * sizeof(float), 3, d->vi.width * 3 * sizeof(float));
+            d->waifu2x->waifu2x(d->scale, d->srcInterleaved, d->dstInterleaved, width, height, 3, width * 3 * sizeof(float), 3, d->vi.width * 3 * sizeof(float), d->blockWidth, d->blockHeight, d->tta);
         if (waifu2xError != Waifu2x::eWaifu2xError_OK)
             return waifu2xError;
 
@@ -98,7 +99,7 @@ static Waifu2x::eWaifu2xError process(const VSFrameRef * src, VSFrameRef * dst, 
             Waifu2x::eWaifu2xError waifu2xError;
 
             if (plane == 0) {
-                waifu2xError = d->waifu2x->waifu2x(d->scale, srcp, dstp, srcWidth, srcHeight, 1, vsapi->getStride(src, plane), 1, vsapi->getStride(dst, plane));
+                waifu2xError = d->waifu2x->waifu2x(d->scale, srcp, dstp, srcWidth, srcHeight, 1, vsapi->getStride(src, plane), 1, vsapi->getStride(dst, plane), d->blockWidth, d->blockHeight, d->tta);
             } else {
                 const float * input = srcp;
                 float * VS_RESTRICT output = d->buffer;
@@ -111,7 +112,7 @@ static Waifu2x::eWaifu2xError process(const VSFrameRef * src, VSFrameRef * dst, 
                     output += srcWidth;
                 }
 
-                waifu2xError = d->waifu2x->waifu2x(d->scale, d->buffer, dstp, srcWidth, srcHeight, 1, srcWidth * sizeof(float), 1, vsapi->getStride(dst, plane));
+                waifu2xError = d->waifu2x->waifu2x(d->scale, d->buffer, dstp, srcWidth, srcHeight, 1, srcWidth * sizeof(float), 1, vsapi->getStride(dst, plane), d->blockWidth, d->blockHeight, d->tta);
 
                 for (int y = 0; y < dstHeight; y++) {
                     for (int x = 0; x < dstWidth; x++)
@@ -149,14 +150,10 @@ static const VSFrameRef *VS_CC waifu2xGetFrame(int n, int activationReason, void
         if (waifu2xError != Waifu2x::eWaifu2xError_OK) {
             const char * err;
 
-            switch (waifu2xError) {
-            case Waifu2x::eWaifu2xError_InvalidParameter:
+            if (waifu2xError == Waifu2x::eWaifu2xError_InvalidParameter)
                 err = "invalid parameter";
-                break;
-            case Waifu2x::eWaifu2xError_FailedProcessCaffe:
+            else if (waifu2xError == Waifu2x::eWaifu2xError_FailedProcessCaffe)
                 err = "failed process caffe";
-                break;
-            }
 
             vsapi->setFilterError((std::string("Waifu2x-caffe: ") + err).c_str(), frameCtx);
             vsapi->freeFrame(src);
@@ -180,11 +177,16 @@ static void VS_CC waifu2xFree(void *instanceData, VSCore *core, const VSAPI *vsa
     vs_aligned_free(d->dstInterleaved);
     vs_aligned_free(d->buffer);
 
+    Waifu2x::quit_liblary();
+
     delete d->waifu2x;
     delete d;
 }
 
 static void VS_CC waifu2xCreate(const VSMap *in, VSMap *out, void *userData, VSCore *core, const VSAPI *vsapi) {
+    char * argv[] = { "" };
+    Waifu2x::init_liblary(1, argv);
+
     Waifu2xData d = {};
     int err;
 
@@ -196,11 +198,17 @@ static void VS_CC waifu2xCreate(const VSMap *in, VSMap *out, void *userData, VSC
     if (err)
         d.scale = 2;
 
-    int block = int64ToIntS(vsapi->propGetInt(in, "block", 0, &err));
+    d.blockWidth = int64ToIntS(vsapi->propGetInt(in, "block_w", 0, &err));
     if (err)
-        block = 128;
+        d.blockWidth = 128;
 
-    const bool photo = !!vsapi->propGetInt(in, "photo", 0, &err);
+    d.blockHeight = int64ToIntS(vsapi->propGetInt(in, "block_h", 0, &err));
+    if (err)
+        d.blockHeight = d.blockWidth;
+
+    int model = int64ToIntS(vsapi->propGetInt(in, "model", 0, &err));
+    if (err)
+        model = 1;
 
     bool cudnn = !!vsapi->propGetInt(in, "cudnn", 0, &err);
     if (err)
@@ -208,7 +216,7 @@ static void VS_CC waifu2xCreate(const VSMap *in, VSMap *out, void *userData, VSC
 
     const int processor = int64ToIntS(vsapi->propGetInt(in, "processor", 0, &err));
 
-    const bool tta = !!vsapi->propGetInt(in, "tta", 0, &err);
+    d.tta = !!vsapi->propGetInt(in, "tta", 0, &err);
 
     if (noise < 0 || noise > 3) {
         vsapi->setError(out, "Waifu2x-caffe: noise must be 0, 1, 2 or 3");
@@ -220,8 +228,18 @@ static void VS_CC waifu2xCreate(const VSMap *in, VSMap *out, void *userData, VSC
         return;
     }
 
-    if (block < 1) {
-        vsapi->setError(out, "Waifu2x-caffe: block must be greater than or equal to 1");
+    if (d.blockWidth < 1) {
+        vsapi->setError(out, "Waifu2x-caffe: block_w must be greater than or equal to 1");
+        return;
+    }
+
+    if (d.blockHeight < 1) {
+        vsapi->setError(out, "Waifu2x-caffe: block_h must be greater than or equal to 1");
+        return;
+    }
+
+    if (model < 0 || model > 4) {
+        vsapi->setError(out, "Waifu2x-caffe: model must be 0, 1, 2, 3 or 4");
         return;
     }
 
@@ -276,44 +294,38 @@ static void VS_CC waifu2xCreate(const VSMap *in, VSMap *out, void *userData, VSC
         }
     }
 
-    const char * mode = (d.scale == 1) ? "noise" : (noise == 0 ? "scale" : "noise_scale");
+    const Waifu2x::eWaifu2xModelType waifu2xModelType =
+        (d.scale == 1) ? Waifu2x::eWaifu2xModelTypeNoise : (noise == 0 ? Waifu2x::eWaifu2xModelTypeScale : Waifu2x::eWaifu2xModelTypeNoiseScale);
 
     const std::string pluginPath(vsapi->getPluginPath(vsapi->getPluginById("com.holywu.waifu2x-caffe", core)));
     std::string modelPath(pluginPath.substr(0, pluginPath.find_last_of('/')));
-    if (d.vi.format->colorFamily == cmRGB) {
-        if (photo)
-            modelPath += "/models/photo";
-        else
-            modelPath += "/models/anime_style_art_rgb";
-    } else {
+    if (model == 0)
         modelPath += "/models/anime_style_art";
-    }
+    else if (model == 1)
+        modelPath += "/models/anime_style_art_rgb";
+    else if (model == 2)
+        modelPath += "/models/photo";
+    else if (model == 3)
+        modelPath += "/models/upconv_7_anime_style_art_rgb";
+    else
+        modelPath += "/models/upconv_7_photo";
 
     d.waifu2x = new Waifu2x();
-    char * argv[] = { "" };
 
-    const Waifu2x::eWaifu2xError waifu2xError =
-        d.waifu2x->init(1, argv, mode, noise, d.scale, boost::optional<int>(), boost::optional<int>(), modelPath, cudnn ? "cudnn" : "gpu", boost::optional<int>(), 32, tta, block, 1, processor);
+    const Waifu2x::eWaifu2xError waifu2xError = d.waifu2x->Init(waifu2xModelType, noise, modelPath, cudnn ? "cudnn" : "gpu", processor);
     if (waifu2xError != Waifu2x::eWaifu2xError_OK) {
         const char * err;
 
-        switch (waifu2xError) {
-        case Waifu2x::eWaifu2xError_InvalidParameter:
+        if (waifu2xError == Waifu2x::eWaifu2xError_InvalidParameter)
             err = "invalid parameter";
-            break;
-        case Waifu2x::eWaifu2xError_FailedOpenModelFile:
+        else if (waifu2xError == Waifu2x::eWaifu2xError_FailedOpenModelFile)
             err = "failed open model file";
-            break;
-        case Waifu2x::eWaifu2xError_FailedParseModelFile:
+        else if (waifu2xError == Waifu2x::eWaifu2xError_FailedParseModelFile)
             err = "failed parse model file";
-            break;
-        case Waifu2x::eWaifu2xError_FailedConstructModel:
+        else if (waifu2xError == Waifu2x::eWaifu2xError_FailedConstructModel)
             err = "failed construct model";
-            break;
-        case Waifu2x::eWaifu2xError_FailedCudaCheck:
+        else if (waifu2xError == Waifu2x::eWaifu2xError_FailedCudaCheck)
             err = "failed CUDA check";
-            break;
-        }
 
         vsapi->setError(out, (std::string("Waifu2x-caffe: ") + err + " at initialization").c_str());
         vsapi->freeNode(d.node);
@@ -366,8 +378,9 @@ VS_EXTERNAL_API(void) VapourSynthPluginInit(VSConfigPlugin configFunc, VSRegiste
                  "clip:clip;"
                  "noise:int:opt;"
                  "scale:int:opt;"
-                 "block:int:opt;"
-                 "photo:int:opt;"
+                 "block_w:int:opt;"
+                 "block_h:int:opt;"
+                 "model:int:opt;"
                  "cudnn:int:opt;"
                  "processor:int:opt;"
                  "tta:int:opt;",

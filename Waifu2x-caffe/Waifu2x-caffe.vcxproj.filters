@@ -21,9 +21,21 @@
     <ClCompile Include="Waifu2x-caffe.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="cNet.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="stImage.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="waifu2x.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="cNet.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="stImage.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
