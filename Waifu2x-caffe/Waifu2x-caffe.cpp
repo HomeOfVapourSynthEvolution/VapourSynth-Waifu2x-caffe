@@ -69,7 +69,8 @@ static Waifu2x::eWaifu2xError process(const VSFrameRef * src, VSFrameRef * dst, 
         }
 
         const Waifu2x::eWaifu2xError waifu2xError =
-            d->waifu2x->waifu2x(d->scale, d->srcInterleaved, d->dstInterleaved, width, height, 3, width * 3 * sizeof(float), 3, d->vi.width * 3 * sizeof(float), d->blockWidth, d->blockHeight, d->tta);
+            d->waifu2x->waifu2x(d->scale, d->srcInterleaved, d->dstInterleaved, width, height, 3, width * 3 * sizeof(float), 3, d->vi.width * 3 * sizeof(float),
+                                d->blockWidth, d->blockHeight, d->tta);
         if (waifu2xError != Waifu2x::eWaifu2xError_OK)
             return waifu2xError;
 
@@ -99,7 +100,8 @@ static Waifu2x::eWaifu2xError process(const VSFrameRef * src, VSFrameRef * dst, 
             Waifu2x::eWaifu2xError waifu2xError;
 
             if (plane == 0) {
-                waifu2xError = d->waifu2x->waifu2x(d->scale, srcp, dstp, srcWidth, srcHeight, 1, vsapi->getStride(src, plane), 1, vsapi->getStride(dst, plane), d->blockWidth, d->blockHeight, d->tta);
+                waifu2xError = d->waifu2x->waifu2x(d->scale, srcp, dstp, srcWidth, srcHeight, 1, vsapi->getStride(src, plane), 1, vsapi->getStride(dst, plane),
+                                                   d->blockWidth, d->blockHeight, d->tta);
             } else {
                 const float * input = srcp;
                 float * VS_RESTRICT output = d->buffer;
@@ -112,7 +114,8 @@ static Waifu2x::eWaifu2xError process(const VSFrameRef * src, VSFrameRef * dst, 
                     output += srcWidth;
                 }
 
-                waifu2xError = d->waifu2x->waifu2x(d->scale, d->buffer, dstp, srcWidth, srcHeight, 1, srcWidth * sizeof(float), 1, vsapi->getStride(dst, plane), d->blockWidth, d->blockHeight, d->tta);
+                waifu2xError = d->waifu2x->waifu2x(d->scale, d->buffer, dstp, srcWidth, srcHeight, 1, srcWidth * sizeof(float), 1, vsapi->getStride(dst, plane),
+                                                   d->blockWidth, d->blockHeight, d->tta);
 
                 for (int y = 0; y < dstHeight; y++) {
                     for (int x = 0; x < dstWidth; x++)
@@ -190,9 +193,7 @@ static void VS_CC waifu2xCreate(const VSMap *in, VSMap *out, void *userData, VSC
     Waifu2xData d {};
     int err;
 
-    int noise = int64ToIntS(vsapi->propGetInt(in, "noise", 0, &err));
-    if (err)
-        noise = 1;
+    const int noise = int64ToIntS(vsapi->propGetInt(in, "noise", 0, &err));
 
     d.scale = int64ToIntS(vsapi->propGetInt(in, "scale", 0, &err));
     if (err)
@@ -218,8 +219,8 @@ static void VS_CC waifu2xCreate(const VSMap *in, VSMap *out, void *userData, VSC
 
     d.tta = !!vsapi->propGetInt(in, "tta", 0, &err);
 
-    if (noise < 0 || noise > 3) {
-        vsapi->setError(out, "Waifu2x-caffe: noise must be 0, 1, 2 or 3");
+    if (noise < -1 || noise > 3) {
+        vsapi->setError(out, "Waifu2x-caffe: noise must be -1, 0, 1, 2 or 3");
         return;
     }
 
@@ -251,7 +252,7 @@ static void VS_CC waifu2xCreate(const VSMap *in, VSMap *out, void *userData, VSC
     d.node = vsapi->propGetNode(in, "clip", 0, nullptr);
     d.vi = *vsapi->getVideoInfo(d.node);
 
-    if (noise == 0 && d.scale == 1) {
+    if (noise == -1 && d.scale == 1) {
         vsapi->propSetNode(out, "clip", d.node, paReplace);
         vsapi->freeNode(d.node);
         return;
@@ -295,7 +296,7 @@ static void VS_CC waifu2xCreate(const VSMap *in, VSMap *out, void *userData, VSC
     }
 
     const Waifu2x::eWaifu2xModelType waifu2xModelType =
-        (d.scale == 1) ? Waifu2x::eWaifu2xModelTypeNoise : (noise == 0 ? Waifu2x::eWaifu2xModelTypeScale : Waifu2x::eWaifu2xModelTypeNoiseScale);
+        (d.scale == 1) ? Waifu2x::eWaifu2xModelTypeNoise : (noise == -1 ? Waifu2x::eWaifu2xModelTypeScale : Waifu2x::eWaifu2xModelTypeNoiseScale);
 
     const std::string pluginPath { vsapi->getPluginPath(vsapi->getPluginById("com.holywu.waifu2x-caffe", core)) };
     std::string modelPath { pluginPath.substr(0, pluginPath.find_last_of('/')) };

@@ -15,12 +15,13 @@ Requires `cudnn64_5.dll` (cuDNN v5.1 RC) to be in the search path. Due to the li
 Usage
 =====
 
-    caffe.Waifu2x(clip clip[, int noise=1, int scale=2, int block_w=128, int block_h=block_w, int model=1, bint cudnn=True, int processor=0, bint tta=False])
+    caffe.Waifu2x(clip clip[, int noise=0, int scale=2, int block_w=128, int block_h=block_w, int model=1, bint cudnn=True, int processor=0, bint tta=False])
 
 * clip: The input clip. Must be 32-bit floating point. Any planar color family is supported.
 
 * noise: Noise reduction level.
-  * 0 = none
+  * -1 = none
+  * 0 = low
   * 1 = medium
   * 2 = high
   * 3 = highest
