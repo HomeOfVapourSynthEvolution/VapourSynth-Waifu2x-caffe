@@ -249,6 +249,11 @@ static void VS_CC waifu2xCreate(const VSMap *in, VSMap *out, void *userData, VSC
         return;
     }
 
+    if (noise == 0 && model == 0) {
+        vsapi->setError(out, "Waifu2x-caffe: the anime_style_art model does not support noise reduction level 0");
+        return;
+    }
+
     d.node = vsapi->propGetNode(in, "clip", 0, nullptr);
     d.vi = *vsapi->getVideoInfo(d.node);
 
