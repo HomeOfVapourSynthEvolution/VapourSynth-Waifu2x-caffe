@@ -7,6 +7,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
+    <UseNativeEnvironment>true</UseNativeEnvironment>
     <ProjectGuid>{F33F21BF-A671-4106-82E1-0DFC3B6BD411}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>Waifu2xcaffe</RootNamespace>

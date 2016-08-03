@@ -57,10 +57,10 @@ static Waifu2x::eWaifu2xError process(const VSFrameRef * src, VSFrameRef * dst, 
 
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
-                const int pos = width * y + x;
-                d->srcInterleaved[pos * 3] = srcpR[x];
-                d->srcInterleaved[pos * 3 + 1] = srcpG[x];
-                d->srcInterleaved[pos * 3 + 2] = srcpB[x];
+                const int pos = (width * y + x) * 3;
+                d->srcInterleaved[pos] = srcpR[x];
+                d->srcInterleaved[pos + 1] = srcpG[x];
+                d->srcInterleaved[pos + 2] = srcpB[x];
             }
 
             srcpR += srcStride;
@@ -76,10 +76,10 @@ static Waifu2x::eWaifu2xError process(const VSFrameRef * src, VSFrameRef * dst, 
 
         for (int y = 0; y < d->vi.height; y++) {
             for (int x = 0; x < d->vi.width; x++) {
-                const int pos = d->vi.width * y + x;
-                dstpR[x] = d->dstInterleaved[pos * 3];
-                dstpG[x] = d->dstInterleaved[pos * 3 + 1];
-                dstpB[x] = d->dstInterleaved[pos * 3 + 2];
+                const int pos = (d->vi.width * y + x) * 3;
+                dstpR[x] = d->dstInterleaved[pos];
+                dstpG[x] = d->dstInterleaved[pos + 1];
+                dstpB[x] = d->dstInterleaved[pos + 2];
             }
 
             dstpR += dstStride;
@@ -209,7 +209,7 @@ static void VS_CC waifu2xCreate(const VSMap *in, VSMap *out, void *userData, VSC
 
     int model = int64ToIntS(vsapi->propGetInt(in, "model", 0, &err));
     if (err)
-        model = 1;
+        model = 3;
 
     bool cudnn = !!vsapi->propGetInt(in, "cudnn", 0, &err);
     if (err)

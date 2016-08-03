@@ -15,7 +15,7 @@ Requires `cudnn64_5.dll` (cuDNN v5.1 RC) to be in the search path. Due to the li
 Usage
 =====
 
-    caffe.Waifu2x(clip clip[, int noise=0, int scale=2, int block_w=128, int block_h=block_w, int model=1, bint cudnn=True, int processor=0, bint tta=False])
+    caffe.Waifu2x(clip clip[, int noise=0, int scale=2, int block_w=128, int block_h=block_w, int model=3, bint cudnn=True, int processor=0, bint tta=False])
 
 * clip: The input clip. Must be 32-bit floating point. Any planar color family is supported.
 
