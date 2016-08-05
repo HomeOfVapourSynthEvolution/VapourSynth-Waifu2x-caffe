@@ -38,16 +38,16 @@ struct Waifu2xData {
     Waifu2x * waifu2x;
 };
 
-static inline bool isPowerOf2(const int i) {
+static inline bool isPowerOf2(const unsigned i) {
     return i && !(i & (i - 1));
 }
 
 static Waifu2x::eWaifu2xError process(const VSFrameRef * src, VSFrameRef * dst, Waifu2xData * VS_RESTRICT d, const VSAPI * vsapi) {
     if (d->vi.format->colorFamily == cmRGB) {
-        const int width = vsapi->getFrameWidth(src, 0);
-        const int height = vsapi->getFrameHeight(src, 0);
-        const int srcStride = vsapi->getStride(src, 0) / sizeof(float);
-        const int dstStride = vsapi->getStride(dst, 0) / sizeof(float);
+        const unsigned width = vsapi->getFrameWidth(src, 0);
+        const unsigned height = vsapi->getFrameHeight(src, 0);
+        const unsigned srcStride = vsapi->getStride(src, 0) / sizeof(float);
+        const unsigned dstStride = vsapi->getStride(dst, 0) / sizeof(float);
         const float * srcpR = reinterpret_cast<const float *>(vsapi->getReadPtr(src, 0));
         const float * srcpG = reinterpret_cast<const float *>(vsapi->getReadPtr(src, 1));
         const float * srcpB = reinterpret_cast<const float *>(vsapi->getReadPtr(src, 2));
@@ -55,9 +55,9 @@ static Waifu2x::eWaifu2xError process(const VSFrameRef * src, VSFrameRef * dst, 
         float * VS_RESTRICT dstpG = reinterpret_cast<float *>(vsapi->getWritePtr(dst, 1));
         float * VS_RESTRICT dstpB = reinterpret_cast<float *>(vsapi->getWritePtr(dst, 2));
 
-        for (int y = 0; y < height; y++) {
-            for (int x = 0; x < width; x++) {
-                const int pos = (width * y + x) * 3;
+        for (unsigned y = 0; y < height; y++) {
+            for (unsigned x = 0; x < width; x++) {
+                const unsigned pos = (width * y + x) * 3;
                 d->srcInterleaved[pos] = srcpR[x];
                 d->srcInterleaved[pos + 1] = srcpG[x];
                 d->srcInterleaved[pos + 2] = srcpB[x];
@@ -74,9 +74,9 @@ static Waifu2x::eWaifu2xError process(const VSFrameRef * src, VSFrameRef * dst, 
         if (waifu2xError != Waifu2x::eWaifu2xError_OK)
             return waifu2xError;
 
-        for (int y = 0; y < d->vi.height; y++) {
-            for (int x = 0; x < d->vi.width; x++) {
-                const int pos = (d->vi.width * y + x) * 3;
+        for (unsigned y = 0; y < d->vi.height; y++) {
+            for (unsigned x = 0; x < d->vi.width; x++) {
+                const unsigned pos = (d->vi.width * y + x) * 3;
                 dstpR[x] = d->dstInterleaved[pos];
                 dstpG[x] = d->dstInterleaved[pos + 1];
                 dstpB[x] = d->dstInterleaved[pos + 2];
@@ -87,13 +87,13 @@ static Waifu2x::eWaifu2xError process(const VSFrameRef * src, VSFrameRef * dst, 
             dstpB += dstStride;
         }
     } else {
-        for (int plane = 0; plane < d->vi.format->numPlanes; plane++) {
-            const int srcWidth = vsapi->getFrameWidth(src, plane);
-            const int dstWidth = vsapi->getFrameWidth(dst, plane);
-            const int srcHeight = vsapi->getFrameHeight(src, plane);
-            const int dstHeight = vsapi->getFrameHeight(dst, plane);
-            const int srcStride = vsapi->getStride(src, plane) / sizeof(float);
-            const int dstStride = vsapi->getStride(dst, plane) / sizeof(float);
+        for (unsigned plane = 0; plane < d->vi.format->numPlanes; plane++) {
+            const unsigned srcWidth = vsapi->getFrameWidth(src, plane);
+            const unsigned dstWidth = vsapi->getFrameWidth(dst, plane);
+            const unsigned srcHeight = vsapi->getFrameHeight(src, plane);
+            const unsigned dstHeight = vsapi->getFrameHeight(dst, plane);
+            const unsigned srcStride = vsapi->getStride(src, plane) / sizeof(float);
+            const unsigned dstStride = vsapi->getStride(dst, plane) / sizeof(float);
             const float * srcp = reinterpret_cast<const float *>(vsapi->getReadPtr(src, plane));
             float * VS_RESTRICT dstp = reinterpret_cast<float *>(vsapi->getWritePtr(dst, plane));
 
@@ -106,8 +106,8 @@ static Waifu2x::eWaifu2xError process(const VSFrameRef * src, VSFrameRef * dst, 
                 const float * input = srcp;
                 float * VS_RESTRICT output = d->buffer;
 
-                for (int y = 0; y < srcHeight; y++) {
-                    for (int x = 0; x < srcWidth; x++)
+                for (unsigned y = 0; y < srcHeight; y++) {
+                    for (unsigned x = 0; x < srcWidth; x++)
                         output[x] = input[x] + 0.5f;
 
                     input += srcStride;
@@ -117,8 +117,8 @@ static Waifu2x::eWaifu2xError process(const VSFrameRef * src, VSFrameRef * dst, 
                 waifu2xError = d->waifu2x->waifu2x(d->scale, d->buffer, dstp, srcWidth, srcHeight, 1, srcWidth * sizeof(float), 1, vsapi->getStride(dst, plane),
                                                    d->blockWidth, d->blockHeight, d->tta);
 
-                for (int y = 0; y < dstHeight; y++) {
-                    for (int x = 0; x < dstWidth; x++)
+                for (unsigned y = 0; y < dstHeight; y++) {
+                    for (unsigned x = 0; x < dstWidth; x++)
                         dstp[x] -= 0.5f;
 
                     dstp += dstStride;
@@ -276,11 +276,11 @@ static void VS_CC waifu2xCreate(const VSMap *in, VSMap *out, void *userData, VSC
         return;
     }
 
-    int iterTimesTwiceScaling;
+    unsigned iterTimesTwiceScaling;
     if (d.scale != 1) {
         d.vi.width *= d.scale;
         d.vi.height *= d.scale;
-        iterTimesTwiceScaling = static_cast<int>(std::log2(d.scale));
+        iterTimesTwiceScaling = static_cast<unsigned>(std::log2(d.scale));
     }
 
     if (d.vi.format->colorFamily == cmRGB) {
@@ -304,7 +304,7 @@ static void VS_CC waifu2xCreate(const VSMap *in, VSMap *out, void *userData, VSC
         (d.scale == 1) ? Waifu2x::eWaifu2xModelTypeNoise : (noise == -1 ? Waifu2x::eWaifu2xModelTypeScale : Waifu2x::eWaifu2xModelTypeNoiseScale);
 
     const std::string pluginPath { vsapi->getPluginPath(vsapi->getPluginById("com.holywu.waifu2x-caffe", core)) };
-    std::string modelPath { pluginPath.substr(0, pluginPath.find_last_of('/')) };
+    std::string modelPath = pluginPath.substr(0, pluginPath.find_last_of('/'));
     if (model == 0)
         modelPath += "/models/anime_style_art";
     else if (model == 1)
@@ -346,7 +346,7 @@ static void VS_CC waifu2xCreate(const VSMap *in, VSMap *out, void *userData, VSC
     if (d.scale != 1 && d.vi.format->subSamplingW != 0) {
         const double offset = 0.5 * (1 << d.vi.format->subSamplingW) - 0.5;
         double shift = 0.;
-        for (int times = 0; times < iterTimesTwiceScaling; times++)
+        for (unsigned times = 0; times < iterTimesTwiceScaling; times++)
             shift = shift * 2. + offset;
 
         VSNodeRef * node = vsapi->propGetNode(out, "clip", 0, nullptr);
