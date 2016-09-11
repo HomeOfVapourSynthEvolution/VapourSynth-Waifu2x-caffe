@@ -28,7 +28,7 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>include;include\msgpack-c;C:\boost_1_61_0;C:\caffe\install\include;C:\caffe\install\gflags\Include;C:\caffe\install\glog\include;C:\caffe\install\hdf5\include;C:\caffe\install\protobuf\include;C:\caffe\install\zlib\include;C:\cuda\include;C:\opencv\install\include;$(CUDA_PATH)\include;C:\Program Files %28x86%29\IntelSWTools\compilers_and_libraries\windows\mkl\include;C:\Program Files %28x86%29\VapourSynth\sdk\include;$(IncludePath)</IncludePath>
+    <IncludePath>include;include\msgpack-c;C:\boost_1_61_0;C:\caffe\install\include;C:\caffe\install\gflags\Include;C:\caffe\install\glog\include;C:\caffe\install\hdf5\include;C:\caffe\install\protobuf\include;C:\caffe\install\zlib\include;C:\cuda\include;C:\opencv\install\include;$(CUDA_PATH)\include;C:\Program Files %28x86%29\IntelSWTools\compilers_and_libraries\windows\mkl\include;C:\Program Files %28x86%29\VapourSynth\sdk\include\vapoursynth;$(IncludePath)</IncludePath>
     <LibraryPath>C:\boost_1_61_0\lib64-msvc-12.0;C:\caffe\install\lib;C:\caffe\install\gflags\Lib;C:\caffe\install\glog\lib;C:\caffe\install\hdf5\lib;C:\caffe\install\protobuf\lib;C:\caffe\install\zlib\lib;C:\cuda\lib\x64;C:\opencv\install\x64\vc12\staticlib;$(CUDA_PATH)\lib\x64;C:\Program Files %28x86%29\IntelSWTools\compilers_and_libraries\windows\mkl\lib\intel64_win;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">

@@ -24,9 +24,11 @@
 
 #include <cmath>
 #include <string>
+
 #include <caffe/caffe.hpp>
-#include <vapoursynth/VapourSynth.h>
-#include <vapoursynth/VSHelper.h>
+#include <VapourSynth.h>
+#include <VSHelper.h>
+
 #include "waifu2x.h"
 
 struct Waifu2xData {
@@ -158,7 +160,7 @@ static const VSFrameRef *VS_CC waifu2xGetFrame(int n, int activationReason, void
             else if (waifu2xError == Waifu2x::eWaifu2xError_FailedProcessCaffe)
                 err = "failed process caffe";
 
-            vsapi->setFilterError((std::string("Waifu2x-caffe: ") + err).c_str(), frameCtx);
+            vsapi->setFilterError((std::string{ "Waifu2x-caffe: " } + err).c_str(), frameCtx);
             vsapi->freeFrame(src);
             vsapi->freeFrame(dst);
             return nullptr;
@@ -176,9 +178,9 @@ static void VS_CC waifu2xFree(void *instanceData, VSCore *core, const VSAPI *vsa
 
     vsapi->freeNode(d->node);
 
-    vs_aligned_free(d->srcInterleaved);
-    vs_aligned_free(d->dstInterleaved);
-    vs_aligned_free(d->buffer);
+    delete[] d->srcInterleaved;
+    delete[] d->dstInterleaved;
+    delete[] d->buffer;
 
     Waifu2x::quit_liblary();
 
@@ -190,160 +192,136 @@ static void VS_CC waifu2xCreate(const VSMap *in, VSMap *out, void *userData, VSC
     char * argv[] { "" };
     Waifu2x::init_liblary(1, argv);
 
-    Waifu2xData d {};
+    Waifu2xData d{};
     int err;
-
-    const int noise = int64ToIntS(vsapi->propGetInt(in, "noise", 0, &err));
-
-    d.scale = int64ToIntS(vsapi->propGetInt(in, "scale", 0, &err));
-    if (err)
-        d.scale = 2;
-
-    d.blockWidth = int64ToIntS(vsapi->propGetInt(in, "block_w", 0, &err));
-    if (err)
-        d.blockWidth = 128;
-
-    d.blockHeight = int64ToIntS(vsapi->propGetInt(in, "block_h", 0, &err));
-    if (err)
-        d.blockHeight = d.blockWidth;
-
-    int model = int64ToIntS(vsapi->propGetInt(in, "model", 0, &err));
-    if (err)
-        model = 3;
-
-    bool cudnn = !!vsapi->propGetInt(in, "cudnn", 0, &err);
-    if (err)
-        cudnn = true;
-
-    const int processor = int64ToIntS(vsapi->propGetInt(in, "processor", 0, &err));
-
-    d.tta = !!vsapi->propGetInt(in, "tta", 0, &err);
-
-    if (noise < -1 || noise > 3) {
-        vsapi->setError(out, "Waifu2x-caffe: noise must be -1, 0, 1, 2 or 3");
-        return;
-    }
-
-    if (d.scale < 1 || !isPowerOf2(d.scale)) {
-        vsapi->setError(out, "Waifu2x-caffe: scale must be greater than or equal to 1 and be a power of 2");
-        return;
-    }
-
-    if (d.blockWidth < 1) {
-        vsapi->setError(out, "Waifu2x-caffe: block_w must be greater than or equal to 1");
-        return;
-    }
-
-    if (d.blockHeight < 1) {
-        vsapi->setError(out, "Waifu2x-caffe: block_h must be greater than or equal to 1");
-        return;
-    }
-
-    if (model < 0 || model > 4) {
-        vsapi->setError(out, "Waifu2x-caffe: model must be 0, 1, 2, 3 or 4");
-        return;
-    }
-
-    if (processor < 0) {
-        vsapi->setError(out, "Waifu2x-caffe: processor must be greater than or equal to 0");
-        return;
-    }
-
-    if (noise == 0 && model == 0) {
-        vsapi->setError(out, "Waifu2x-caffe: the anime_style_art model does not support noise reduction level 0");
-        return;
-    }
 
     d.node = vsapi->propGetNode(in, "clip", 0, nullptr);
     d.vi = *vsapi->getVideoInfo(d.node);
 
-    if (noise == -1 && d.scale == 1) {
-        vsapi->propSetNode(out, "clip", d.node, paReplace);
-        vsapi->freeNode(d.node);
-        return;
-    }
-
-    if (!isConstantFormat(&d.vi) || d.vi.format->sampleType != stFloat || d.vi.format->bitsPerSample != 32) {
-        vsapi->setError(out, "Waifu2x-caffe: only constant format 32-bit float input supported");
-        vsapi->freeNode(d.node);
-        return;
-    }
-
-    VSPlugin * fmtcPlugin = vsapi->getPluginById("fmtconv", core);
-    if (d.scale != 1 && d.vi.format->subSamplingW != 0 && !fmtcPlugin) {
-        vsapi->setError(out, "Waifu2x-caffe: the fmtconv plugin is required for correcting the horizontal chroma shift");
-        vsapi->freeNode(d.node);
-        return;
-    }
-
+    VSPlugin * fmtcPlugin;
     unsigned iterTimesTwiceScaling;
-    if (d.scale != 1) {
-        d.vi.width *= d.scale;
-        d.vi.height *= d.scale;
-        iterTimesTwiceScaling = static_cast<unsigned>(std::log2(d.scale));
-    }
 
-    if (d.vi.format->colorFamily == cmRGB) {
-        d.srcInterleaved = vs_aligned_malloc<float>(vsapi->getVideoInfo(d.node)->width * vsapi->getVideoInfo(d.node)->height * 3 * sizeof(float), 32);
-        d.dstInterleaved = vs_aligned_malloc<float>(d.vi.width * d.vi.height * 3 * sizeof(float), 32);
-        if (!d.srcInterleaved || !d.dstInterleaved) {
-            vsapi->setError(out, "Waifu2x-caffe: malloc failure (srcInterleaved/dstInterleaved)");
+    try {
+        const int noise = int64ToIntS(vsapi->propGetInt(in, "noise", 0, &err));
+
+        d.scale = int64ToIntS(vsapi->propGetInt(in, "scale", 0, &err));
+        if (err)
+            d.scale = 2;
+
+        d.blockWidth = int64ToIntS(vsapi->propGetInt(in, "block_w", 0, &err));
+        if (err)
+            d.blockWidth = 128;
+
+        d.blockHeight = int64ToIntS(vsapi->propGetInt(in, "block_h", 0, &err));
+        if (err)
+            d.blockHeight = d.blockWidth;
+
+        int model = int64ToIntS(vsapi->propGetInt(in, "model", 0, &err));
+        if (err)
+            model = 3;
+
+        bool cudnn = !!vsapi->propGetInt(in, "cudnn", 0, &err);
+        if (err)
+            cudnn = true;
+
+        const int processor = int64ToIntS(vsapi->propGetInt(in, "processor", 0, &err));
+
+        d.tta = !!vsapi->propGetInt(in, "tta", 0, &err);
+
+        if (noise == -1 && d.scale == 1) {
+            vsapi->propSetNode(out, "clip", d.node, paReplace);
             vsapi->freeNode(d.node);
             return;
         }
-    } else {
-        d.buffer = vs_aligned_malloc<float>(d.vi.width * d.vi.height * sizeof(float), 32);
-        if (!d.buffer) {
-            vsapi->setError(out, "Waifu2x-caffe: malloc failure (buffer)");
-            vsapi->freeNode(d.node);
-            return;
+
+        if (!isConstantFormat(&d.vi) || d.vi.format->sampleType != stFloat || d.vi.format->bitsPerSample != 32)
+            throw std::string{ "only constant format 32-bit float input supported" };
+
+        if (noise < -1 || noise > 3)
+            throw std::string{ "noise must be -1, 0, 1, 2 or 3" };
+
+        if (d.scale < 1 || !isPowerOf2(d.scale))
+            throw std::string{ "scale must be greater than or equal to 1 and be a power of 2" };
+
+        if (d.blockWidth < 1)
+            throw std::string{ "block_w must be greater than or equal to 1" };
+
+        if (d.blockHeight < 1)
+            throw std::string{ "block_h must be greater than or equal to 1" };
+
+        if (model < 0 || model > 4)
+            throw std::string{ "model must be 0, 1, 2, 3 or 4" };
+
+        if (processor < 0)
+            throw std::string{ "processor must be greater than or equal to 0" };
+
+        if (noise == 0 && model == 0)
+            throw std::string{ "the anime_style_art model does not support noise reduction level 0" };
+
+        fmtcPlugin = vsapi->getPluginById("fmtconv", core);
+        if (d.scale != 1 && d.vi.format->subSamplingW && !fmtcPlugin)
+            throw std::string{ "the fmtconv plugin is required for correcting the horizontal chroma shift" };
+
+        if (d.scale != 1) {
+            d.vi.width *= d.scale;
+            d.vi.height *= d.scale;
+            iterTimesTwiceScaling = static_cast<unsigned>(std::log2(d.scale));
         }
-    }
 
-    const Waifu2x::eWaifu2xModelType waifu2xModelType =
-        (d.scale == 1) ? Waifu2x::eWaifu2xModelTypeNoise : (noise == -1 ? Waifu2x::eWaifu2xModelTypeScale : Waifu2x::eWaifu2xModelTypeNoiseScale);
+        if (d.vi.format->colorFamily == cmRGB) {
+            d.srcInterleaved = new (std::nothrow) float[vsapi->getVideoInfo(d.node)->width * vsapi->getVideoInfo(d.node)->height * 3];
+            d.dstInterleaved = new (std::nothrow) float[d.vi.width * d.vi.height * 3];
+            if (!d.srcInterleaved || !d.dstInterleaved)
+                throw std::string{ "malloc failure (srcInterleaved/dstInterleaved)" };
+        } else {
+            d.buffer = new (std::nothrow) float[d.vi.width * d.vi.height];
+            if (!d.buffer)
+                throw std::string{ "malloc failure (buffer)" };
+        }
 
-    const std::string pluginPath { vsapi->getPluginPath(vsapi->getPluginById("com.holywu.waifu2x-caffe", core)) };
-    std::string modelPath = pluginPath.substr(0, pluginPath.find_last_of('/'));
-    if (model == 0)
-        modelPath += "/models/anime_style_art";
-    else if (model == 1)
-        modelPath += "/models/anime_style_art_rgb";
-    else if (model == 2)
-        modelPath += "/models/photo";
-    else if (model == 3)
-        modelPath += "/models/upconv_7_anime_style_art_rgb";
-    else
-        modelPath += "/models/upconv_7_photo";
+        const auto waifu2xModelType = (d.scale == 1) ? Waifu2x::eWaifu2xModelTypeNoise : (noise == -1 ? Waifu2x::eWaifu2xModelTypeScale : Waifu2x::eWaifu2xModelTypeNoiseScale);
 
-    d.waifu2x = new Waifu2x;
+        const std::string pluginPath{ vsapi->getPluginPath(vsapi->getPluginById("com.holywu.waifu2x-caffe", core)) };
+        std::string modelPath{ pluginPath.substr(0, pluginPath.find_last_of('/')) };
+        if (model == 0)
+            modelPath += "/models/anime_style_art";
+        else if (model == 1)
+            modelPath += "/models/anime_style_art_rgb";
+        else if (model == 2)
+            modelPath += "/models/photo";
+        else if (model == 3)
+            modelPath += "/models/upconv_7_anime_style_art_rgb";
+        else
+            modelPath += "/models/upconv_7_photo";
 
-    const Waifu2x::eWaifu2xError waifu2xError = d.waifu2x->Init(waifu2xModelType, noise, modelPath, cudnn ? "cudnn" : "gpu", processor);
-    if (waifu2xError != Waifu2x::eWaifu2xError_OK) {
-        const char * err;
+        d.waifu2x = new Waifu2x{};
 
-        if (waifu2xError == Waifu2x::eWaifu2xError_InvalidParameter)
-            err = "invalid parameter";
-        else if (waifu2xError == Waifu2x::eWaifu2xError_FailedOpenModelFile)
-            err = "failed open model file";
-        else if (waifu2xError == Waifu2x::eWaifu2xError_FailedParseModelFile)
-            err = "failed parse model file";
-        else if (waifu2xError == Waifu2x::eWaifu2xError_FailedConstructModel)
-            err = "failed construct model";
-        else if (waifu2xError == Waifu2x::eWaifu2xError_FailedCudaCheck)
-            err = "failed CUDA check";
-
-        vsapi->setError(out, (std::string("Waifu2x-caffe: ") + err + " at initialization").c_str());
+        const auto waifu2xError = d.waifu2x->Init(waifu2xModelType, noise, modelPath, cudnn ? "cudnn" : "gpu", processor);
+        if (waifu2xError != Waifu2x::eWaifu2xError_OK) {
+            const char * err;
+            if (waifu2xError == Waifu2x::eWaifu2xError_InvalidParameter)
+                err = "invalid parameter";
+            else if (waifu2xError == Waifu2x::eWaifu2xError_FailedOpenModelFile)
+                err = "failed open model file";
+            else if (waifu2xError == Waifu2x::eWaifu2xError_FailedParseModelFile)
+                err = "failed parse model file";
+            else if (waifu2xError == Waifu2x::eWaifu2xError_FailedConstructModel)
+                err = "failed construct model";
+            else if (waifu2xError == Waifu2x::eWaifu2xError_FailedCudaCheck)
+                err = "failed CUDA check";
+            throw std::string{ err } + " at initialization";
+        }
+    } catch (std::string & error) {
+        vsapi->setError(out, ("Waifu2x-caffe: " + error).c_str());
         vsapi->freeNode(d.node);
-        delete d.waifu2x;
         return;
     }
 
-    Waifu2xData * data = new Waifu2xData { d };
+    Waifu2xData * data = new Waifu2xData{ d };
 
     vsapi->createFilter(in, out, "Waifu2x-caffe", waifu2xInit, waifu2xGetFrame, waifu2xFree, fmParallelRequests, 0, data, core);
 
-    if (d.scale != 1 && d.vi.format->subSamplingW != 0) {
+    if (d.scale != 1 && d.vi.format->subSamplingW) {
         const double offset = 0.5 * (1 << d.vi.format->subSamplingW) - 0.5;
         double shift = 0.;
         for (unsigned times = 0; times < iterTimesTwiceScaling; times++)
