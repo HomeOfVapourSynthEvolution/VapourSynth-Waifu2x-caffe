@@ -40,7 +40,7 @@ struct Waifu2xData {
     Waifu2x * waifu2x;
 };
 
-static inline bool isPowerOf2(const unsigned i) {
+static bool isPowerOf2(const int i) {
     return i && !(i & (i - 1));
 }
 
@@ -70,9 +70,8 @@ static Waifu2x::eWaifu2xError process(const VSFrameRef * src, VSFrameRef * dst, 
             srcpB += srcStride;
         }
 
-        const Waifu2x::eWaifu2xError waifu2xError =
-            d->waifu2x->waifu2x(d->scale, d->srcInterleaved, d->dstInterleaved, width, height, 3, width * 3 * sizeof(float), 3, d->vi.width * 3 * sizeof(float),
-                                d->blockWidth, d->blockHeight, d->tta);
+        const auto waifu2xError = d->waifu2x->waifu2x(d->scale, d->srcInterleaved, d->dstInterleaved, width, height, 3, width * 3 * sizeof(float), 3, d->vi.width * 3 * sizeof(float),
+                                                      d->blockWidth, d->blockHeight, d->tta);
         if (waifu2xError != Waifu2x::eWaifu2xError_OK)
             return waifu2xError;
 
@@ -151,7 +150,7 @@ static const VSFrameRef *VS_CC waifu2xGetFrame(int n, int activationReason, void
         const VSFrameRef * src = vsapi->getFrameFilter(n, d->node, frameCtx);
         VSFrameRef * dst = vsapi->newVideoFrame(d->vi.format, d->vi.width, d->vi.height, src, core);
 
-        const Waifu2x::eWaifu2xError waifu2xError = process(src, dst, d, vsapi);
+        const auto waifu2xError = process(src, dst, d, vsapi);
         if (waifu2xError != Waifu2x::eWaifu2xError_OK) {
             const char * err;
 
@@ -189,7 +188,7 @@ static void VS_CC waifu2xFree(void *instanceData, VSCore *core, const VSAPI *vsa
 }
 
 static void VS_CC waifu2xCreate(const VSMap *in, VSMap *out, void *userData, VSCore *core, const VSAPI *vsapi) {
-    char * argv[] { "" };
+    char * argv[]{ "" };
     Waifu2x::init_liblary(1, argv);
 
     Waifu2xData d{};
@@ -279,7 +278,7 @@ static void VS_CC waifu2xCreate(const VSMap *in, VSMap *out, void *userData, VSC
                 throw std::string{ "malloc failure (buffer)" };
         }
 
-        const auto waifu2xModelType = (d.scale == 1) ? Waifu2x::eWaifu2xModelTypeNoise : (noise == -1 ? Waifu2x::eWaifu2xModelTypeScale : Waifu2x::eWaifu2xModelTypeNoiseScale);
+        const auto modelType = (d.scale == 1) ? Waifu2x::eWaifu2xModelTypeNoise : (noise == -1 ? Waifu2x::eWaifu2xModelTypeScale : Waifu2x::eWaifu2xModelTypeNoiseScale);
 
         const std::string pluginPath{ vsapi->getPluginPath(vsapi->getPluginById("com.holywu.waifu2x-caffe", core)) };
         std::string modelPath{ pluginPath.substr(0, pluginPath.find_last_of('/')) };
@@ -296,7 +295,7 @@ static void VS_CC waifu2xCreate(const VSMap *in, VSMap *out, void *userData, VSC
 
         d.waifu2x = new Waifu2x{};
 
-        const auto waifu2xError = d.waifu2x->Init(waifu2xModelType, noise, modelPath, cudnn ? "cudnn" : "gpu", processor);
+        const auto waifu2xError = d.waifu2x->Init(modelType, noise, modelPath, cudnn ? "cudnn" : "gpu", processor);
         if (waifu2xError != Waifu2x::eWaifu2xError_OK) {
             const char * err;
             if (waifu2xError == Waifu2x::eWaifu2xError_InvalidParameter)
@@ -311,7 +310,7 @@ static void VS_CC waifu2xCreate(const VSMap *in, VSMap *out, void *userData, VSC
                 err = "failed CUDA check";
             throw std::string{ err } + " at initialization";
         }
-    } catch (std::string & error) {
+    } catch (const std::string & error) {
         vsapi->setError(out, ("Waifu2x-caffe: " + error).c_str());
         vsapi->freeNode(d.node);
         return;
