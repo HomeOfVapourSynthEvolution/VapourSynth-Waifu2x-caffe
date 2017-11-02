@@ -29,6 +29,8 @@ typedef enum {
     MSGPACK_OBJECT_BOOLEAN              = 0x01,
     MSGPACK_OBJECT_POSITIVE_INTEGER     = 0x02,
     MSGPACK_OBJECT_NEGATIVE_INTEGER     = 0x03,
+    MSGPACK_OBJECT_FLOAT32              = 0x0a,
+    MSGPACK_OBJECT_FLOAT64              = 0x04,
     MSGPACK_OBJECT_FLOAT                = 0x04,
 #if defined(MSGPACK_USE_LEGACY_NAME_AS_FLOAT)
     MSGPACK_OBJECT_DOUBLE               = MSGPACK_OBJECT_FLOAT, /* obsolete */
@@ -97,6 +99,9 @@ typedef struct msgpack_object_kv {
 
 MSGPACK_DLLEXPORT
 void msgpack_object_print(FILE* out, msgpack_object o);
+
+MSGPACK_DLLEXPORT
+int msgpack_object_print_buffer(char *buffer, size_t buffer_size, msgpack_object o);
 
 MSGPACK_DLLEXPORT
 bool msgpack_object_equal(const msgpack_object x, const msgpack_object y);

@@ -60,7 +60,6 @@ public:
     ) :
         m_obj(obj), m_zone(msgpack::move(z)) { }
 
-    // obsolete
     void set(msgpack::object const& obj)
         { m_obj = obj; }
 
@@ -141,13 +140,17 @@ inline std::size_t aligned_zone_size(msgpack::object const& obj) {
     std::size_t s = 0;
     switch (obj.type) {
     case msgpack::type::ARRAY:
-        s += sizeof(msgpack::object) * obj.via.array.size;
+        s += msgpack::aligned_size(
+            sizeof(msgpack::object) * obj.via.array.size,
+            MSGPACK_ZONE_ALIGNOF(msgpack::object));
         for (uint32_t i = 0; i < obj.via.array.size; ++i) {
             s += msgpack::aligned_zone_size(obj.via.array.ptr[i]);
         }
         break;
     case msgpack::type::MAP:
-        s += sizeof(msgpack::object_kv) * obj.via.map.size;
+        s += msgpack::aligned_size(
+            sizeof(msgpack::object_kv) * obj.via.map.size,
+            MSGPACK_ZONE_ALIGNOF(msgpack::object_kv));
         for (uint32_t i = 0; i < obj.via.map.size; ++i) {
             s += msgpack::aligned_zone_size(obj.via.map.ptr[i].key);
             s += msgpack::aligned_zone_size(obj.via.map.ptr[i].val);
@@ -155,13 +158,14 @@ inline std::size_t aligned_zone_size(msgpack::object const& obj) {
         break;
     case msgpack::type::EXT:
         s += msgpack::aligned_size(
-            detail::add_ext_type_size<sizeof(std::size_t)>(obj.via.ext.size));
+            detail::add_ext_type_size<sizeof(std::size_t)>(obj.via.ext.size),
+            MSGPACK_ZONE_ALIGNOF(char));
         break;
     case msgpack::type::STR:
-        s += msgpack::aligned_size(obj.via.str.size);
+        s += msgpack::aligned_size(obj.via.str.size, MSGPACK_ZONE_ALIGNOF(char));
         break;
     case msgpack::type::BIN:
-        s += msgpack::aligned_size(obj.via.bin.size);
+        s += msgpack::aligned_size(obj.via.bin.size, MSGPACK_ZONE_ALIGNOF(char));
         break;
     default:
         break;
@@ -257,7 +261,11 @@ struct pack<msgpack::object> {
             o.pack_int64(v.via.i64);
             return o;
 
-        case msgpack::type::FLOAT:
+        case msgpack::type::FLOAT32:
+            o.pack_float(static_cast<float>(v.via.f64));
+            return o;
+
+        case msgpack::type::FLOAT64:
             o.pack_double(v.via.f64);
             return o;
 
@@ -311,12 +319,13 @@ struct object_with_zone<msgpack::object> {
         case msgpack::type::BOOLEAN:
         case msgpack::type::POSITIVE_INTEGER:
         case msgpack::type::NEGATIVE_INTEGER:
-        case msgpack::type::FLOAT:
+        case msgpack::type::FLOAT32:
+        case msgpack::type::FLOAT64:
             std::memcpy(&o.via, &v.via, sizeof(v.via));
             return;
 
         case msgpack::type::STR: {
-            char* ptr = static_cast<char*>(o.zone.allocate_align(v.via.str.size));
+            char* ptr = static_cast<char*>(o.zone.allocate_align(v.via.str.size, MSGPACK_ZONE_ALIGNOF(char)));
             o.via.str.ptr = ptr;
             o.via.str.size = v.via.str.size;
             std::memcpy(ptr, v.via.str.ptr, v.via.str.size);
@@ -324,7 +333,7 @@ struct object_with_zone<msgpack::object> {
         }
 
         case msgpack::type::BIN: {
-            char* ptr = static_cast<char*>(o.zone.allocate_align(v.via.bin.size));
+            char* ptr = static_cast<char*>(o.zone.allocate_align(v.via.bin.size, MSGPACK_ZONE_ALIGNOF(char)));
             o.via.bin.ptr = ptr;
             o.via.bin.size = v.via.bin.size;
             std::memcpy(ptr, v.via.bin.ptr, v.via.bin.size);
@@ -332,7 +341,7 @@ struct object_with_zone<msgpack::object> {
         }
 
         case msgpack::type::EXT: {
-            char* ptr = static_cast<char*>(o.zone.allocate_align(v.via.ext.size + 1));
+            char* ptr = static_cast<char*>(o.zone.allocate_align(v.via.ext.size + 1, MSGPACK_ZONE_ALIGNOF(char)));
             o.via.ext.ptr = ptr;
             o.via.ext.size = v.via.ext.size;
             std::memcpy(ptr, v.via.ext.ptr, v.via.ext.size + 1);
@@ -340,7 +349,7 @@ struct object_with_zone<msgpack::object> {
         }
 
         case msgpack::type::ARRAY:
-            o.via.array.ptr = static_cast<msgpack::object*>(o.zone.allocate_align(sizeof(msgpack::object) * v.via.array.size));
+            o.via.array.ptr = static_cast<msgpack::object*>(o.zone.allocate_align(sizeof(msgpack::object) * v.via.array.size, MSGPACK_ZONE_ALIGNOF(msgpack::object)));
             o.via.array.size = v.via.array.size;
             for (msgpack::object
                      * po(o.via.array.ptr),
@@ -353,7 +362,7 @@ struct object_with_zone<msgpack::object> {
             return;
 
         case msgpack::type::MAP:
-            o.via.map.ptr = (msgpack::object_kv*)o.zone.allocate_align(sizeof(msgpack::object_kv) * v.via.map.size);
+            o.via.map.ptr = (msgpack::object_kv*)o.zone.allocate_align(sizeof(msgpack::object_kv) * v.via.map.size, MSGPACK_ZONE_ALIGNOF(msgpack::object_kv));
             o.via.map.size = v.via.map.size;
             for(msgpack::object_kv
                     * po(o.via.map.ptr),
@@ -395,7 +404,6 @@ class define : public Type {
 public:
     typedef Type msgpack_type;
     typedef define<Type> define_type;
-
     define() {}
     define(const msgpack_type& v) : msgpack_type(v) {}
 
@@ -438,7 +446,8 @@ inline bool operator==(const msgpack::object& x, const msgpack::object& y)
     case msgpack::type::NEGATIVE_INTEGER:
         return x.via.i64 == y.via.i64;
 
-    case msgpack::type::FLOAT:
+    case msgpack::type::FLOAT32:
+    case msgpack::type::FLOAT64:
         return x.via.f64 == y.via.f64;
 
     case msgpack::type::STR:
@@ -698,7 +707,11 @@ inline msgpack::packer<Stream>& operator<< (msgpack::packer<Stream>& o, const ms
         o.pack_int64(v.via.i64);
         return o;
 
-    case msgpack::type::FLOAT:
+    case msgpack::type::FLOAT32:
+        o.pack_float(v.via.f64);
+        return o;
+
+    case msgpack::type::FLOAT64:
         o.pack_double(v.via.f64);
         return o;
 
@@ -766,7 +779,8 @@ inline std::ostream& operator<< (std::ostream& s, const msgpack::object& o)
         s << o.via.i64;
         break;
 
-    case msgpack::type::FLOAT:
+    case msgpack::type::FLOAT32:
+    case msgpack::type::FLOAT64:
         s << o.via.f64;
         break;
 
@@ -802,7 +816,9 @@ inline std::ostream& operator<< (std::ostream& s, const msgpack::object& o)
             default: {
                 unsigned int code = static_cast<unsigned int>(c);
                 if (code < 0x20 || code == 0x7f) {
+                    std::ios::fmtflags flags(s.flags());
                     s << "\\u" << std::hex << std::setw(4) << std::setfill('0') << (code & 0xff);
+                    s.flags(flags);
                 }
                 else {
                     s << c;

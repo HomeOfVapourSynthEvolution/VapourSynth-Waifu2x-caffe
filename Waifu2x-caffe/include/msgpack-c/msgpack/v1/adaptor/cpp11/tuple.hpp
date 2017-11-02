@@ -109,7 +109,7 @@ struct StdTupleConverter<Tuple, 0> {
 namespace adaptor {
 
 template <typename... Args>
-struct as<std::tuple<Args...>, typename std::enable_if<msgpack::all_of<msgpack::has_as, Args...>::value>::type>  {
+struct as<std::tuple<Args...>, typename std::enable_if<msgpack::any_of<msgpack::has_as, Args...>::value>::type>  {
     std::tuple<Args...> operator()(
         msgpack::object const& o) const {
         if (o.type != msgpack::type::ARRAY) { throw msgpack::type_error(); }
@@ -158,7 +158,7 @@ struct object_with_zone<std::tuple<Args...>> {
         std::tuple<Args...> const& v) const {
         uint32_t size = checked_get_container_size(sizeof...(Args));
         o.type = msgpack::type::ARRAY;
-        o.via.array.ptr = static_cast<msgpack::object*>(o.zone.allocate_align(sizeof(msgpack::object)*size));
+        o.via.array.ptr = static_cast<msgpack::object*>(o.zone.allocate_align(sizeof(msgpack::object)*size, MSGPACK_ZONE_ALIGNOF(msgpack::object)));
         o.via.array.size = size;
         StdTupleToObjectWithZone<decltype(v), sizeof...(Args)>::convert(o, v);
     }

@@ -67,13 +67,15 @@ struct define_array<A0> {
             switch(size) {
             default:
             case 1: ptr[0].convert(a0);
+            // fallthrough
+
             }
         }
     }
     void msgpack_object(msgpack::object* o, msgpack::zone& z) const
     {
         o->type = msgpack::type::ARRAY;
-        o->via.array.ptr = static_cast<msgpack::object*>(z.allocate_align(sizeof(msgpack::object)*1));
+        o->via.array.ptr = static_cast<msgpack::object*>(z.allocate_align(sizeof(msgpack::object)*1, MSGPACK_ZONE_ALIGNOF(msgpack::object)));
         o->via.array.size = 1;
         
         o->via.array.ptr[0] = msgpack::object(a0, z);
@@ -105,14 +107,18 @@ struct define_array<A0, A1> {
             switch(size) {
             default:
             case 2: ptr[1].convert(a1);
+            // fallthrough
+
             case 1: ptr[0].convert(a0);
+            // fallthrough
+
             }
         }
     }
     void msgpack_object(msgpack::object* o, msgpack::zone& z) const
     {
         o->type = msgpack::type::ARRAY;
-        o->via.array.ptr = static_cast<msgpack::object*>(z.allocate_align(sizeof(msgpack::object)*2));
+        o->via.array.ptr = static_cast<msgpack::object*>(z.allocate_align(sizeof(msgpack::object)*2, MSGPACK_ZONE_ALIGNOF(msgpack::object)));
         o->via.array.size = 2;
         
         o->via.array.ptr[0] = msgpack::object(a0, z);
@@ -147,15 +153,21 @@ struct define_array<A0, A1, A2> {
             switch(size) {
             default:
             case 3: ptr[2].convert(a2);
+            // fallthrough
+
             case 2: ptr[1].convert(a1);
+            // fallthrough
+
             case 1: ptr[0].convert(a0);
+            // fallthrough
+
             }
         }
     }
     void msgpack_object(msgpack::object* o, msgpack::zone& z) const
     {
         o->type = msgpack::type::ARRAY;
-        o->via.array.ptr = static_cast<msgpack::object*>(z.allocate_align(sizeof(msgpack::object)*3));
+        o->via.array.ptr = static_cast<msgpack::object*>(z.allocate_align(sizeof(msgpack::object)*3, MSGPACK_ZONE_ALIGNOF(msgpack::object)));
         o->via.array.size = 3;
         
         o->via.array.ptr[0] = msgpack::object(a0, z);
@@ -193,16 +205,24 @@ struct define_array<A0, A1, A2, A3> {
             switch(size) {
             default:
             case 4: ptr[3].convert(a3);
+            // fallthrough
+
             case 3: ptr[2].convert(a2);
+            // fallthrough
+
             case 2: ptr[1].convert(a1);
+            // fallthrough
+
             case 1: ptr[0].convert(a0);
+            // fallthrough
+
             }
         }
     }
     void msgpack_object(msgpack::object* o, msgpack::zone& z) const
     {
         o->type = msgpack::type::ARRAY;
-        o->via.array.ptr = static_cast<msgpack::object*>(z.allocate_align(sizeof(msgpack::object)*4));
+        o->via.array.ptr = static_cast<msgpack::object*>(z.allocate_align(sizeof(msgpack::object)*4, MSGPACK_ZONE_ALIGNOF(msgpack::object)));
         o->via.array.size = 4;
         
         o->via.array.ptr[0] = msgpack::object(a0, z);
@@ -243,17 +263,27 @@ struct define_array<A0, A1, A2, A3, A4> {
             switch(size) {
             default:
             case 5: ptr[4].convert(a4);
+            // fallthrough
+
             case 4: ptr[3].convert(a3);
+            // fallthrough
+
             case 3: ptr[2].convert(a2);
+            // fallthrough
+
             case 2: ptr[1].convert(a1);
+            // fallthrough
+
             case 1: ptr[0].convert(a0);
+            // fallthrough
+
             }
         }
     }
     void msgpack_object(msgpack::object* o, msgpack::zone& z) const
     {
         o->type = msgpack::type::ARRAY;
-        o->via.array.ptr = static_cast<msgpack::object*>(z.allocate_align(sizeof(msgpack::object)*5));
+        o->via.array.ptr = static_cast<msgpack::object*>(z.allocate_align(sizeof(msgpack::object)*5, MSGPACK_ZONE_ALIGNOF(msgpack::object)));
         o->via.array.size = 5;
         
         o->via.array.ptr[0] = msgpack::object(a0, z);
@@ -297,18 +327,30 @@ struct define_array<A0, A1, A2, A3, A4, A5> {
             switch(size) {
             default:
             case 6: ptr[5].convert(a5);
+            // fallthrough
+
             case 5: ptr[4].convert(a4);
+            // fallthrough
+
             case 4: ptr[3].convert(a3);
+            // fallthrough
+
             case 3: ptr[2].convert(a2);
+            // fallthrough
+
             case 2: ptr[1].convert(a1);
+            // fallthrough
+
             case 1: ptr[0].convert(a0);
+            // fallthrough
+
             }
         }
     }
     void msgpack_object(msgpack::object* o, msgpack::zone& z) const
     {
         o->type = msgpack::type::ARRAY;
-        o->via.array.ptr = static_cast<msgpack::object*>(z.allocate_align(sizeof(msgpack::object)*6));
+        o->via.array.ptr = static_cast<msgpack::object*>(z.allocate_align(sizeof(msgpack::object)*6, MSGPACK_ZONE_ALIGNOF(msgpack::object)));
         o->via.array.size = 6;
         
         o->via.array.ptr[0] = msgpack::object(a0, z);
@@ -355,19 +397,33 @@ struct define_array<A0, A1, A2, A3, A4, A5, A6> {
             switch(size) {
             default:
             case 7: ptr[6].convert(a6);
+            // fallthrough
+
             case 6: ptr[5].convert(a5);
+            // fallthrough
+
             case 5: ptr[4].convert(a4);
+            // fallthrough
+
             case 4: ptr[3].convert(a3);
+            // fallthrough
+
             case 3: ptr[2].convert(a2);
+            // fallthrough
+
             case 2: ptr[1].convert(a1);
+            // fallthrough
+
             case 1: ptr[0].convert(a0);
+            // fallthrough
+
             }
         }
     }
     void msgpack_object(msgpack::object* o, msgpack::zone& z) const
     {
         o->type = msgpack::type::ARRAY;
-        o->via.array.ptr = static_cast<msgpack::object*>(z.allocate_align(sizeof(msgpack::object)*7));
+        o->via.array.ptr = static_cast<msgpack::object*>(z.allocate_align(sizeof(msgpack::object)*7, MSGPACK_ZONE_ALIGNOF(msgpack::object)));
         o->via.array.size = 7;
         
         o->via.array.ptr[0] = msgpack::object(a0, z);
@@ -417,20 +473,36 @@ struct define_array<A0, A1, A2, A3, A4, A5, A6, A7> {
             switch(size) {
             default:
             case 8: ptr[7].convert(a7);
+            // fallthrough
+
             case 7: ptr[6].convert(a6);
+            // fallthrough
+
             case 6: ptr[5].convert(a5);
+            // fallthrough
+
             case 5: ptr[4].convert(a4);
+            // fallthrough
+
             case 4: ptr[3].convert(a3);
+            // fallthrough
+
             case 3: ptr[2].convert(a2);
+            // fallthrough
+
             case 2: ptr[1].convert(a1);
+            // fallthrough
+
             case 1: ptr[0].convert(a0);
+            // fallthrough
+
             }
         }
     }
     void msgpack_object(msgpack::object* o, msgpack::zone& z) const
     {
         o->type = msgpack::type::ARRAY;
-        o->via.array.ptr = static_cast<msgpack::object*>(z.allocate_align(sizeof(msgpack::object)*8));
+        o->via.array.ptr = static_cast<msgpack::object*>(z.allocate_align(sizeof(msgpack::object)*8, MSGPACK_ZONE_ALIGNOF(msgpack::object)));
         o->via.array.size = 8;
         
         o->via.array.ptr[0] = msgpack::object(a0, z);
@@ -483,21 +555,39 @@ struct define_array<A0, A1, A2, A3, A4, A5, A6, A7, A8> {
             switch(size) {
             default:
             case 9: ptr[8].convert(a8);
+            // fallthrough
+
             case 8: ptr[7].convert(a7);
+            // fallthrough
+
             case 7: ptr[6].convert(a6);
+            // fallthrough
+
             case 6: ptr[5].convert(a5);
+            // fallthrough
+
             case 5: ptr[4].convert(a4);
+            // fallthrough
+
             case 4: ptr[3].convert(a3);
+            // fallthrough
+
             case 3: ptr[2].convert(a2);
+            // fallthrough
+
             case 2: ptr[1].convert(a1);
+            // fallthrough
+
             case 1: ptr[0].convert(a0);
+            // fallthrough
+
             }
         }
     }
     void msgpack_object(msgpack::object* o, msgpack::zone& z) const
     {
         o->type = msgpack::type::ARRAY;
-        o->via.array.ptr = static_cast<msgpack::object*>(z.allocate_align(sizeof(msgpack::object)*9));
+        o->via.array.ptr = static_cast<msgpack::object*>(z.allocate_align(sizeof(msgpack::object)*9, MSGPACK_ZONE_ALIGNOF(msgpack::object)));
         o->via.array.size = 9;
         
         o->via.array.ptr[0] = msgpack::object(a0, z);
@@ -553,22 +643,42 @@ struct define_array<A0, A1, A2, A3, A4, A5, A6, A7, A8, A9> {
             switch(size) {
             default:
             case 10: ptr[9].convert(a9);
+            // fallthrough
+
             case 9: ptr[8].convert(a8);
+            // fallthrough
+
             case 8: ptr[7].convert(a7);
+            // fallthrough
+
             case 7: ptr[6].convert(a6);
+            // fallthrough
+
             case 6: ptr[5].convert(a5);
+            // fallthrough
+
             case 5: ptr[4].convert(a4);
+            // fallthrough
+
             case 4: ptr[3].convert(a3);
+            // fallthrough
+
             case 3: ptr[2].convert(a2);
+            // fallthrough
+
             case 2: ptr[1].convert(a1);
+            // fallthrough
+
             case 1: ptr[0].convert(a0);
+            // fallthrough
+
             }
         }
     }
     void msgpack_object(msgpack::object* o, msgpack::zone& z) const
     {
         o->type = msgpack::type::ARRAY;
-        o->via.array.ptr = static_cast<msgpack::object*>(z.allocate_align(sizeof(msgpack::object)*10));
+        o->via.array.ptr = static_cast<msgpack::object*>(z.allocate_align(sizeof(msgpack::object)*10, MSGPACK_ZONE_ALIGNOF(msgpack::object)));
         o->via.array.size = 10;
         
         o->via.array.ptr[0] = msgpack::object(a0, z);
@@ -627,23 +737,45 @@ struct define_array<A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10> {
             switch(size) {
             default:
             case 11: ptr[10].convert(a10);
+            // fallthrough
+
             case 10: ptr[9].convert(a9);
+            // fallthrough
+
             case 9: ptr[8].convert(a8);
+            // fallthrough
+
             case 8: ptr[7].convert(a7);
+            // fallthrough
+
             case 7: ptr[6].convert(a6);
+            // fallthrough
+
             case 6: ptr[5].convert(a5);
+            // fallthrough
+
             case 5: ptr[4].convert(a4);
+            // fallthrough
+
             case 4: ptr[3].convert(a3);
+            // fallthrough
+
             case 3: ptr[2].convert(a2);
+            // fallthrough
+
             case 2: ptr[1].convert(a1);
+            // fallthrough
+
             case 1: ptr[0].convert(a0);
+            // fallthrough
+
             }
         }
     }
     void msgpack_object(msgpack::object* o, msgpack::zone& z) const
     {
         o->type = msgpack::type::ARRAY;
-        o->via.array.ptr = static_cast<msgpack::object*>(z.allocate_align(sizeof(msgpack::object)*11));
+        o->via.array.ptr = static_cast<msgpack::object*>(z.allocate_align(sizeof(msgpack::object)*11, MSGPACK_ZONE_ALIGNOF(msgpack::object)));
         o->via.array.size = 11;
         
         o->via.array.ptr[0] = msgpack::object(a0, z);
@@ -705,24 +837,48 @@ struct define_array<A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11> {
             switch(size) {
             default:
             case 12: ptr[11].convert(a11);
+            // fallthrough
+
             case 11: ptr[10].convert(a10);
+            // fallthrough
+
             case 10: ptr[9].convert(a9);
+            // fallthrough
+
             case 9: ptr[8].convert(a8);
+            // fallthrough
+
             case 8: ptr[7].convert(a7);
+            // fallthrough
+
             case 7: ptr[6].convert(a6);
+            // fallthrough
+
             case 6: ptr[5].convert(a5);
+            // fallthrough
+
             case 5: ptr[4].convert(a4);
+            // fallthrough
+
             case 4: ptr[3].convert(a3);
+            // fallthrough
+
             case 3: ptr[2].convert(a2);
+            // fallthrough
+
             case 2: ptr[1].convert(a1);
+            // fallthrough
+
             case 1: ptr[0].convert(a0);
+            // fallthrough
+
             }
         }
     }
     void msgpack_object(msgpack::object* o, msgpack::zone& z) const
     {
         o->type = msgpack::type::ARRAY;
-        o->via.array.ptr = static_cast<msgpack::object*>(z.allocate_align(sizeof(msgpack::object)*12));
+        o->via.array.ptr = static_cast<msgpack::object*>(z.allocate_align(sizeof(msgpack::object)*12, MSGPACK_ZONE_ALIGNOF(msgpack::object)));
         o->via.array.size = 12;
         
         o->via.array.ptr[0] = msgpack::object(a0, z);
@@ -787,25 +943,51 @@ struct define_array<A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12> {
             switch(size) {
             default:
             case 13: ptr[12].convert(a12);
+            // fallthrough
+
             case 12: ptr[11].convert(a11);
+            // fallthrough
+
             case 11: ptr[10].convert(a10);
+            // fallthrough
+
             case 10: ptr[9].convert(a9);
+            // fallthrough
+
             case 9: ptr[8].convert(a8);
+            // fallthrough
+
             case 8: ptr[7].convert(a7);
+            // fallthrough
+
             case 7: ptr[6].convert(a6);
+            // fallthrough
+
             case 6: ptr[5].convert(a5);
+            // fallthrough
+
             case 5: ptr[4].convert(a4);
+            // fallthrough
+
             case 4: ptr[3].convert(a3);
+            // fallthrough
+
             case 3: ptr[2].convert(a2);
+            // fallthrough
+
             case 2: ptr[1].convert(a1);
+            // fallthrough
+
             case 1: ptr[0].convert(a0);
+            // fallthrough
+
             }
         }
     }
     void msgpack_object(msgpack::object* o, msgpack::zone& z) const
     {
         o->type = msgpack::type::ARRAY;
-        o->via.array.ptr = static_cast<msgpack::object*>(z.allocate_align(sizeof(msgpack::object)*13));
+        o->via.array.ptr = static_cast<msgpack::object*>(z.allocate_align(sizeof(msgpack::object)*13, MSGPACK_ZONE_ALIGNOF(msgpack::object)));
         o->via.array.size = 13;
         
         o->via.array.ptr[0] = msgpack::object(a0, z);
@@ -873,26 +1055,54 @@ struct define_array<A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13> 
             switch(size) {
             default:
             case 14: ptr[13].convert(a13);
+            // fallthrough
+
             case 13: ptr[12].convert(a12);
+            // fallthrough
+
             case 12: ptr[11].convert(a11);
+            // fallthrough
+
             case 11: ptr[10].convert(a10);
+            // fallthrough
+
             case 10: ptr[9].convert(a9);
+            // fallthrough
+
             case 9: ptr[8].convert(a8);
+            // fallthrough
+
             case 8: ptr[7].convert(a7);
+            // fallthrough
+
             case 7: ptr[6].convert(a6);
+            // fallthrough
+
             case 6: ptr[5].convert(a5);
+            // fallthrough
+
             case 5: ptr[4].convert(a4);
+            // fallthrough
+
             case 4: ptr[3].convert(a3);
+            // fallthrough
+
             case 3: ptr[2].convert(a2);
+            // fallthrough
+
             case 2: ptr[1].convert(a1);
+            // fallthrough
+
             case 1: ptr[0].convert(a0);
+            // fallthrough
+
             }
         }
     }
     void msgpack_object(msgpack::object* o, msgpack::zone& z) const
     {
         o->type = msgpack::type::ARRAY;
-        o->via.array.ptr = static_cast<msgpack::object*>(z.allocate_align(sizeof(msgpack::object)*14));
+        o->via.array.ptr = static_cast<msgpack::object*>(z.allocate_align(sizeof(msgpack::object)*14, MSGPACK_ZONE_ALIGNOF(msgpack::object)));
         o->via.array.size = 14;
         
         o->via.array.ptr[0] = msgpack::object(a0, z);
@@ -963,27 +1173,57 @@ struct define_array<A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, 
             switch(size) {
             default:
             case 15: ptr[14].convert(a14);
+            // fallthrough
+
             case 14: ptr[13].convert(a13);
+            // fallthrough
+
             case 13: ptr[12].convert(a12);
+            // fallthrough
+
             case 12: ptr[11].convert(a11);
+            // fallthrough
+
             case 11: ptr[10].convert(a10);
+            // fallthrough
+
             case 10: ptr[9].convert(a9);
+            // fallthrough
+
             case 9: ptr[8].convert(a8);
+            // fallthrough
+
             case 8: ptr[7].convert(a7);
+            // fallthrough
+
             case 7: ptr[6].convert(a6);
+            // fallthrough
+
             case 6: ptr[5].convert(a5);
+            // fallthrough
+
             case 5: ptr[4].convert(a4);
+            // fallthrough
+
             case 4: ptr[3].convert(a3);
+            // fallthrough
+
             case 3: ptr[2].convert(a2);
+            // fallthrough
+
             case 2: ptr[1].convert(a1);
+            // fallthrough
+
             case 1: ptr[0].convert(a0);
+            // fallthrough
+
             }
         }
     }
     void msgpack_object(msgpack::object* o, msgpack::zone& z) const
     {
         o->type = msgpack::type::ARRAY;
-        o->via.array.ptr = static_cast<msgpack::object*>(z.allocate_align(sizeof(msgpack::object)*15));
+        o->via.array.ptr = static_cast<msgpack::object*>(z.allocate_align(sizeof(msgpack::object)*15, MSGPACK_ZONE_ALIGNOF(msgpack::object)));
         o->via.array.size = 15;
         
         o->via.array.ptr[0] = msgpack::object(a0, z);
@@ -1057,28 +1297,60 @@ struct define_array<A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, 
             switch(size) {
             default:
             case 16: ptr[15].convert(a15);
+            // fallthrough
+
             case 15: ptr[14].convert(a14);
+            // fallthrough
+
             case 14: ptr[13].convert(a13);
+            // fallthrough
+
             case 13: ptr[12].convert(a12);
+            // fallthrough
+
             case 12: ptr[11].convert(a11);
+            // fallthrough
+
             case 11: ptr[10].convert(a10);
+            // fallthrough
+
             case 10: ptr[9].convert(a9);
+            // fallthrough
+
             case 9: ptr[8].convert(a8);
+            // fallthrough
+
             case 8: ptr[7].convert(a7);
+            // fallthrough
+
             case 7: ptr[6].convert(a6);
+            // fallthrough
+
             case 6: ptr[5].convert(a5);
+            // fallthrough
+
             case 5: ptr[4].convert(a4);
+            // fallthrough
+
             case 4: ptr[3].convert(a3);
+            // fallthrough
+
             case 3: ptr[2].convert(a2);
+            // fallthrough
+
             case 2: ptr[1].convert(a1);
+            // fallthrough
+
             case 1: ptr[0].convert(a0);
+            // fallthrough
+
             }
         }
     }
     void msgpack_object(msgpack::object* o, msgpack::zone& z) const
     {
         o->type = msgpack::type::ARRAY;
-        o->via.array.ptr = static_cast<msgpack::object*>(z.allocate_align(sizeof(msgpack::object)*16));
+        o->via.array.ptr = static_cast<msgpack::object*>(z.allocate_align(sizeof(msgpack::object)*16, MSGPACK_ZONE_ALIGNOF(msgpack::object)));
         o->via.array.size = 16;
         
         o->via.array.ptr[0] = msgpack::object(a0, z);
@@ -1155,29 +1427,63 @@ struct define_array<A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, 
             switch(size) {
             default:
             case 17: ptr[16].convert(a16);
+            // fallthrough
+
             case 16: ptr[15].convert(a15);
+            // fallthrough
+
             case 15: ptr[14].convert(a14);
+            // fallthrough
+
             case 14: ptr[13].convert(a13);
+            // fallthrough
+
             case 13: ptr[12].convert(a12);
+            // fallthrough
+
             case 12: ptr[11].convert(a11);
+            // fallthrough
+
             case 11: ptr[10].convert(a10);
+            // fallthrough
+
             case 10: ptr[9].convert(a9);
+            // fallthrough
+
             case 9: ptr[8].convert(a8);
+            // fallthrough
+
             case 8: ptr[7].convert(a7);
+            // fallthrough
+
             case 7: ptr[6].convert(a6);
+            // fallthrough
+
             case 6: ptr[5].convert(a5);
+            // fallthrough
+
             case 5: ptr[4].convert(a4);
+            // fallthrough
+
             case 4: ptr[3].convert(a3);
+            // fallthrough
+
             case 3: ptr[2].convert(a2);
+            // fallthrough
+
             case 2: ptr[1].convert(a1);
+            // fallthrough
+
             case 1: ptr[0].convert(a0);
+            // fallthrough
+
             }
         }
     }
     void msgpack_object(msgpack::object* o, msgpack::zone& z) const
     {
         o->type = msgpack::type::ARRAY;
-        o->via.array.ptr = static_cast<msgpack::object*>(z.allocate_align(sizeof(msgpack::object)*17));
+        o->via.array.ptr = static_cast<msgpack::object*>(z.allocate_align(sizeof(msgpack::object)*17, MSGPACK_ZONE_ALIGNOF(msgpack::object)));
         o->via.array.size = 17;
         
         o->via.array.ptr[0] = msgpack::object(a0, z);
@@ -1257,30 +1563,66 @@ struct define_array<A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, 
             switch(size) {
             default:
             case 18: ptr[17].convert(a17);
+            // fallthrough
+
             case 17: ptr[16].convert(a16);
+            // fallthrough
+
             case 16: ptr[15].convert(a15);
+            // fallthrough
+
             case 15: ptr[14].convert(a14);
+            // fallthrough
+
             case 14: ptr[13].convert(a13);
+            // fallthrough
+
             case 13: ptr[12].convert(a12);
+            // fallthrough
+
             case 12: ptr[11].convert(a11);
+            // fallthrough
+
             case 11: ptr[10].convert(a10);
+            // fallthrough
+
             case 10: ptr[9].convert(a9);
+            // fallthrough
+
             case 9: ptr[8].convert(a8);
+            // fallthrough
+
             case 8: ptr[7].convert(a7);
+            // fallthrough
+
             case 7: ptr[6].convert(a6);
+            // fallthrough
+
             case 6: ptr[5].convert(a5);
+            // fallthrough
+
             case 5: ptr[4].convert(a4);
+            // fallthrough
+
             case 4: ptr[3].convert(a3);
+            // fallthrough
+
             case 3: ptr[2].convert(a2);
+            // fallthrough
+
             case 2: ptr[1].convert(a1);
+            // fallthrough
+
             case 1: ptr[0].convert(a0);
+            // fallthrough
+
             }
         }
     }
     void msgpack_object(msgpack::object* o, msgpack::zone& z) const
     {
         o->type = msgpack::type::ARRAY;
-        o->via.array.ptr = static_cast<msgpack::object*>(z.allocate_align(sizeof(msgpack::object)*18));
+        o->via.array.ptr = static_cast<msgpack::object*>(z.allocate_align(sizeof(msgpack::object)*18, MSGPACK_ZONE_ALIGNOF(msgpack::object)));
         o->via.array.size = 18;
         
         o->via.array.ptr[0] = msgpack::object(a0, z);
@@ -1363,31 +1705,69 @@ struct define_array<A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, 
             switch(size) {
             default:
             case 19: ptr[18].convert(a18);
+            // fallthrough
+
             case 18: ptr[17].convert(a17);
+            // fallthrough
+
             case 17: ptr[16].convert(a16);
+            // fallthrough
+
             case 16: ptr[15].convert(a15);
+            // fallthrough
+
             case 15: ptr[14].convert(a14);
+            // fallthrough
+
             case 14: ptr[13].convert(a13);
+            // fallthrough
+
             case 13: ptr[12].convert(a12);
+            // fallthrough
+
             case 12: ptr[11].convert(a11);
+            // fallthrough
+
             case 11: ptr[10].convert(a10);
+            // fallthrough
+
             case 10: ptr[9].convert(a9);
+            // fallthrough
+
             case 9: ptr[8].convert(a8);
+            // fallthrough
+
             case 8: ptr[7].convert(a7);
+            // fallthrough
+
             case 7: ptr[6].convert(a6);
+            // fallthrough
+
             case 6: ptr[5].convert(a5);
+            // fallthrough
+
             case 5: ptr[4].convert(a4);
+            // fallthrough
+
             case 4: ptr[3].convert(a3);
+            // fallthrough
+
             case 3: ptr[2].convert(a2);
+            // fallthrough
+
             case 2: ptr[1].convert(a1);
+            // fallthrough
+
             case 1: ptr[0].convert(a0);
+            // fallthrough
+
             }
         }
     }
     void msgpack_object(msgpack::object* o, msgpack::zone& z) const
     {
         o->type = msgpack::type::ARRAY;
-        o->via.array.ptr = static_cast<msgpack::object*>(z.allocate_align(sizeof(msgpack::object)*19));
+        o->via.array.ptr = static_cast<msgpack::object*>(z.allocate_align(sizeof(msgpack::object)*19, MSGPACK_ZONE_ALIGNOF(msgpack::object)));
         o->via.array.size = 19;
         
         o->via.array.ptr[0] = msgpack::object(a0, z);
@@ -1473,32 +1853,72 @@ struct define_array<A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, 
             switch(size) {
             default:
             case 20: ptr[19].convert(a19);
+            // fallthrough
+
             case 19: ptr[18].convert(a18);
+            // fallthrough
+
             case 18: ptr[17].convert(a17);
+            // fallthrough
+
             case 17: ptr[16].convert(a16);
+            // fallthrough
+
             case 16: ptr[15].convert(a15);
+            // fallthrough
+
             case 15: ptr[14].convert(a14);
+            // fallthrough
+
             case 14: ptr[13].convert(a13);
+            // fallthrough
+
             case 13: ptr[12].convert(a12);
+            // fallthrough
+
             case 12: ptr[11].convert(a11);
+            // fallthrough
+
             case 11: ptr[10].convert(a10);
+            // fallthrough
+
             case 10: ptr[9].convert(a9);
+            // fallthrough
+
             case 9: ptr[8].convert(a8);
+            // fallthrough
+
             case 8: ptr[7].convert(a7);
+            // fallthrough
+
             case 7: ptr[6].convert(a6);
+            // fallthrough
+
             case 6: ptr[5].convert(a5);
+            // fallthrough
+
             case 5: ptr[4].convert(a4);
+            // fallthrough
+
             case 4: ptr[3].convert(a3);
+            // fallthrough
+
             case 3: ptr[2].convert(a2);
+            // fallthrough
+
             case 2: ptr[1].convert(a1);
+            // fallthrough
+
             case 1: ptr[0].convert(a0);
+            // fallthrough
+
             }
         }
     }
     void msgpack_object(msgpack::object* o, msgpack::zone& z) const
     {
         o->type = msgpack::type::ARRAY;
-        o->via.array.ptr = static_cast<msgpack::object*>(z.allocate_align(sizeof(msgpack::object)*20));
+        o->via.array.ptr = static_cast<msgpack::object*>(z.allocate_align(sizeof(msgpack::object)*20, MSGPACK_ZONE_ALIGNOF(msgpack::object)));
         o->via.array.size = 20;
         
         o->via.array.ptr[0] = msgpack::object(a0, z);
@@ -1587,33 +2007,75 @@ struct define_array<A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, 
             switch(size) {
             default:
             case 21: ptr[20].convert(a20);
+            // fallthrough
+
             case 20: ptr[19].convert(a19);
+            // fallthrough
+
             case 19: ptr[18].convert(a18);
+            // fallthrough
+
             case 18: ptr[17].convert(a17);
+            // fallthrough
+
             case 17: ptr[16].convert(a16);
+            // fallthrough
+
             case 16: ptr[15].convert(a15);
+            // fallthrough
+
             case 15: ptr[14].convert(a14);
+            // fallthrough
+
             case 14: ptr[13].convert(a13);
+            // fallthrough
+
             case 13: ptr[12].convert(a12);
+            // fallthrough
+
             case 12: ptr[11].convert(a11);
+            // fallthrough
+
             case 11: ptr[10].convert(a10);
+            // fallthrough
+
             case 10: ptr[9].convert(a9);
+            // fallthrough
+
             case 9: ptr[8].convert(a8);
+            // fallthrough
+
             case 8: ptr[7].convert(a7);
+            // fallthrough
+
             case 7: ptr[6].convert(a6);
+            // fallthrough
+
             case 6: ptr[5].convert(a5);
+            // fallthrough
+
             case 5: ptr[4].convert(a4);
+            // fallthrough
+
             case 4: ptr[3].convert(a3);
+            // fallthrough
+
             case 3: ptr[2].convert(a2);
+            // fallthrough
+
             case 2: ptr[1].convert(a1);
+            // fallthrough
+
             case 1: ptr[0].convert(a0);
+            // fallthrough
+
             }
         }
     }
     void msgpack_object(msgpack::object* o, msgpack::zone& z) const
     {
         o->type = msgpack::type::ARRAY;
-        o->via.array.ptr = static_cast<msgpack::object*>(z.allocate_align(sizeof(msgpack::object)*21));
+        o->via.array.ptr = static_cast<msgpack::object*>(z.allocate_align(sizeof(msgpack::object)*21, MSGPACK_ZONE_ALIGNOF(msgpack::object)));
         o->via.array.size = 21;
         
         o->via.array.ptr[0] = msgpack::object(a0, z);
@@ -1705,34 +2167,78 @@ struct define_array<A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, 
             switch(size) {
             default:
             case 22: ptr[21].convert(a21);
+            // fallthrough
+
             case 21: ptr[20].convert(a20);
+            // fallthrough
+
             case 20: ptr[19].convert(a19);
+            // fallthrough
+
             case 19: ptr[18].convert(a18);
+            // fallthrough
+
             case 18: ptr[17].convert(a17);
+            // fallthrough
+
             case 17: ptr[16].convert(a16);
+            // fallthrough
+
             case 16: ptr[15].convert(a15);
+            // fallthrough
+
             case 15: ptr[14].convert(a14);
+            // fallthrough
+
             case 14: ptr[13].convert(a13);
+            // fallthrough
+
             case 13: ptr[12].convert(a12);
+            // fallthrough
+
             case 12: ptr[11].convert(a11);
+            // fallthrough
+
             case 11: ptr[10].convert(a10);
+            // fallthrough
+
             case 10: ptr[9].convert(a9);
+            // fallthrough
+
             case 9: ptr[8].convert(a8);
+            // fallthrough
+
             case 8: ptr[7].convert(a7);
+            // fallthrough
+
             case 7: ptr[6].convert(a6);
+            // fallthrough
+
             case 6: ptr[5].convert(a5);
+            // fallthrough
+
             case 5: ptr[4].convert(a4);
+            // fallthrough
+
             case 4: ptr[3].convert(a3);
+            // fallthrough
+
             case 3: ptr[2].convert(a2);
+            // fallthrough
+
             case 2: ptr[1].convert(a1);
+            // fallthrough
+
             case 1: ptr[0].convert(a0);
+            // fallthrough
+
             }
         }
     }
     void msgpack_object(msgpack::object* o, msgpack::zone& z) const
     {
         o->type = msgpack::type::ARRAY;
-        o->via.array.ptr = static_cast<msgpack::object*>(z.allocate_align(sizeof(msgpack::object)*22));
+        o->via.array.ptr = static_cast<msgpack::object*>(z.allocate_align(sizeof(msgpack::object)*22, MSGPACK_ZONE_ALIGNOF(msgpack::object)));
         o->via.array.size = 22;
         
         o->via.array.ptr[0] = msgpack::object(a0, z);
@@ -1827,35 +2333,81 @@ struct define_array<A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, 
             switch(size) {
             default:
             case 23: ptr[22].convert(a22);
+            // fallthrough
+
             case 22: ptr[21].convert(a21);
+            // fallthrough
+
             case 21: ptr[20].convert(a20);
+            // fallthrough
+
             case 20: ptr[19].convert(a19);
+            // fallthrough
+
             case 19: ptr[18].convert(a18);
+            // fallthrough
+
             case 18: ptr[17].convert(a17);
+            // fallthrough
+
             case 17: ptr[16].convert(a16);
+            // fallthrough
+
             case 16: ptr[15].convert(a15);
+            // fallthrough
+
             case 15: ptr[14].convert(a14);
+            // fallthrough
+
             case 14: ptr[13].convert(a13);
+            // fallthrough
+
             case 13: ptr[12].convert(a12);
+            // fallthrough
+
             case 12: ptr[11].convert(a11);
+            // fallthrough
+
             case 11: ptr[10].convert(a10);
+            // fallthrough
+
             case 10: ptr[9].convert(a9);
+            // fallthrough
+
             case 9: ptr[8].convert(a8);
+            // fallthrough
+
             case 8: ptr[7].convert(a7);
+            // fallthrough
+
             case 7: ptr[6].convert(a6);
+            // fallthrough
+
             case 6: ptr[5].convert(a5);
+            // fallthrough
+
             case 5: ptr[4].convert(a4);
+            // fallthrough
+
             case 4: ptr[3].convert(a3);
+            // fallthrough
+
             case 3: ptr[2].convert(a2);
+            // fallthrough
+
             case 2: ptr[1].convert(a1);
+            // fallthrough
+
             case 1: ptr[0].convert(a0);
+            // fallthrough
+
             }
         }
     }
     void msgpack_object(msgpack::object* o, msgpack::zone& z) const
     {
         o->type = msgpack::type::ARRAY;
-        o->via.array.ptr = static_cast<msgpack::object*>(z.allocate_align(sizeof(msgpack::object)*23));
+        o->via.array.ptr = static_cast<msgpack::object*>(z.allocate_align(sizeof(msgpack::object)*23, MSGPACK_ZONE_ALIGNOF(msgpack::object)));
         o->via.array.size = 23;
         
         o->via.array.ptr[0] = msgpack::object(a0, z);
@@ -1953,36 +2505,84 @@ struct define_array<A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, 
             switch(size) {
             default:
             case 24: ptr[23].convert(a23);
+            // fallthrough
+
             case 23: ptr[22].convert(a22);
+            // fallthrough
+
             case 22: ptr[21].convert(a21);
+            // fallthrough
+
             case 21: ptr[20].convert(a20);
+            // fallthrough
+
             case 20: ptr[19].convert(a19);
+            // fallthrough
+
             case 19: ptr[18].convert(a18);
+            // fallthrough
+
             case 18: ptr[17].convert(a17);
+            // fallthrough
+
             case 17: ptr[16].convert(a16);
+            // fallthrough
+
             case 16: ptr[15].convert(a15);
+            // fallthrough
+
             case 15: ptr[14].convert(a14);
+            // fallthrough
+
             case 14: ptr[13].convert(a13);
+            // fallthrough
+
             case 13: ptr[12].convert(a12);
+            // fallthrough
+
             case 12: ptr[11].convert(a11);
+            // fallthrough
+
             case 11: ptr[10].convert(a10);
+            // fallthrough
+
             case 10: ptr[9].convert(a9);
+            // fallthrough
+
             case 9: ptr[8].convert(a8);
+            // fallthrough
+
             case 8: ptr[7].convert(a7);
+            // fallthrough
+
             case 7: ptr[6].convert(a6);
+            // fallthrough
+
             case 6: ptr[5].convert(a5);
+            // fallthrough
+
             case 5: ptr[4].convert(a4);
+            // fallthrough
+
             case 4: ptr[3].convert(a3);
+            // fallthrough
+
             case 3: ptr[2].convert(a2);
+            // fallthrough
+
             case 2: ptr[1].convert(a1);
+            // fallthrough
+
             case 1: ptr[0].convert(a0);
+            // fallthrough
+
             }
         }
     }
     void msgpack_object(msgpack::object* o, msgpack::zone& z) const
     {
         o->type = msgpack::type::ARRAY;
-        o->via.array.ptr = static_cast<msgpack::object*>(z.allocate_align(sizeof(msgpack::object)*24));
+        o->via.array.ptr = static_cast<msgpack::object*>(z.allocate_align(sizeof(msgpack::object)*24, MSGPACK_ZONE_ALIGNOF(msgpack::object)));
         o->via.array.size = 24;
         
         o->via.array.ptr[0] = msgpack::object(a0, z);
@@ -2083,37 +2683,87 @@ struct define_array<A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, 
             switch(size) {
             default:
             case 25: ptr[24].convert(a24);
+            // fallthrough
+
             case 24: ptr[23].convert(a23);
+            // fallthrough
+
             case 23: ptr[22].convert(a22);
+            // fallthrough
+
             case 22: ptr[21].convert(a21);
+            // fallthrough
+
             case 21: ptr[20].convert(a20);
+            // fallthrough
+
             case 20: ptr[19].convert(a19);
+            // fallthrough
+
             case 19: ptr[18].convert(a18);
+            // fallthrough
+
             case 18: ptr[17].convert(a17);
+            // fallthrough
+
             case 17: ptr[16].convert(a16);
+            // fallthrough
+
             case 16: ptr[15].convert(a15);
+            // fallthrough
+
             case 15: ptr[14].convert(a14);
+            // fallthrough
+
             case 14: ptr[13].convert(a13);
+            // fallthrough
+
             case 13: ptr[12].convert(a12);
+            // fallthrough
+
             case 12: ptr[11].convert(a11);
+            // fallthrough
+
             case 11: ptr[10].convert(a10);
+            // fallthrough
+
             case 10: ptr[9].convert(a9);
+            // fallthrough
+
             case 9: ptr[8].convert(a8);
+            // fallthrough
+
             case 8: ptr[7].convert(a7);
+            // fallthrough
+
             case 7: ptr[6].convert(a6);
+            // fallthrough
+
             case 6: ptr[5].convert(a5);
+            // fallthrough
+
             case 5: ptr[4].convert(a4);
+            // fallthrough
+
             case 4: ptr[3].convert(a3);
+            // fallthrough
+
             case 3: ptr[2].convert(a2);
+            // fallthrough
+
             case 2: ptr[1].convert(a1);
+            // fallthrough
+
             case 1: ptr[0].convert(a0);
+            // fallthrough
+
             }
         }
     }
     void msgpack_object(msgpack::object* o, msgpack::zone& z) const
     {
         o->type = msgpack::type::ARRAY;
-        o->via.array.ptr = static_cast<msgpack::object*>(z.allocate_align(sizeof(msgpack::object)*25));
+        o->via.array.ptr = static_cast<msgpack::object*>(z.allocate_align(sizeof(msgpack::object)*25, MSGPACK_ZONE_ALIGNOF(msgpack::object)));
         o->via.array.size = 25;
         
         o->via.array.ptr[0] = msgpack::object(a0, z);
@@ -2217,38 +2867,90 @@ struct define_array<A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, 
             switch(size) {
             default:
             case 26: ptr[25].convert(a25);
+            // fallthrough
+
             case 25: ptr[24].convert(a24);
+            // fallthrough
+
             case 24: ptr[23].convert(a23);
+            // fallthrough
+
             case 23: ptr[22].convert(a22);
+            // fallthrough
+
             case 22: ptr[21].convert(a21);
+            // fallthrough
+
             case 21: ptr[20].convert(a20);
+            // fallthrough
+
             case 20: ptr[19].convert(a19);
+            // fallthrough
+
             case 19: ptr[18].convert(a18);
+            // fallthrough
+
             case 18: ptr[17].convert(a17);
+            // fallthrough
+
             case 17: ptr[16].convert(a16);
+            // fallthrough
+
             case 16: ptr[15].convert(a15);
+            // fallthrough
+
             case 15: ptr[14].convert(a14);
+            // fallthrough
+
             case 14: ptr[13].convert(a13);
+            // fallthrough
+
             case 13: ptr[12].convert(a12);
+            // fallthrough
+
             case 12: ptr[11].convert(a11);
+            // fallthrough
+
             case 11: ptr[10].convert(a10);
+            // fallthrough
+
             case 10: ptr[9].convert(a9);
+            // fallthrough
+
             case 9: ptr[8].convert(a8);
+            // fallthrough
+
             case 8: ptr[7].convert(a7);
+            // fallthrough
+
             case 7: ptr[6].convert(a6);
+            // fallthrough
+
             case 6: ptr[5].convert(a5);
+            // fallthrough
+
             case 5: ptr[4].convert(a4);
+            // fallthrough
+
             case 4: ptr[3].convert(a3);
+            // fallthrough
+
             case 3: ptr[2].convert(a2);
+            // fallthrough
+
             case 2: ptr[1].convert(a1);
+            // fallthrough
+
             case 1: ptr[0].convert(a0);
+            // fallthrough
+
             }
         }
     }
     void msgpack_object(msgpack::object* o, msgpack::zone& z) const
     {
         o->type = msgpack::type::ARRAY;
-        o->via.array.ptr = static_cast<msgpack::object*>(z.allocate_align(sizeof(msgpack::object)*26));
+        o->via.array.ptr = static_cast<msgpack::object*>(z.allocate_align(sizeof(msgpack::object)*26, MSGPACK_ZONE_ALIGNOF(msgpack::object)));
         o->via.array.size = 26;
         
         o->via.array.ptr[0] = msgpack::object(a0, z);
@@ -2355,39 +3057,93 @@ struct define_array<A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, 
             switch(size) {
             default:
             case 27: ptr[26].convert(a26);
+            // fallthrough
+
             case 26: ptr[25].convert(a25);
+            // fallthrough
+
             case 25: ptr[24].convert(a24);
+            // fallthrough
+
             case 24: ptr[23].convert(a23);
+            // fallthrough
+
             case 23: ptr[22].convert(a22);
+            // fallthrough
+
             case 22: ptr[21].convert(a21);
+            // fallthrough
+
             case 21: ptr[20].convert(a20);
+            // fallthrough
+
             case 20: ptr[19].convert(a19);
+            // fallthrough
+
             case 19: ptr[18].convert(a18);
+            // fallthrough
+
             case 18: ptr[17].convert(a17);
+            // fallthrough
+
             case 17: ptr[16].convert(a16);
+            // fallthrough
+
             case 16: ptr[15].convert(a15);
+            // fallthrough
+
             case 15: ptr[14].convert(a14);
+            // fallthrough
+
             case 14: ptr[13].convert(a13);
+            // fallthrough
+
             case 13: ptr[12].convert(a12);
+            // fallthrough
+
             case 12: ptr[11].convert(a11);
+            // fallthrough
+
             case 11: ptr[10].convert(a10);
+            // fallthrough
+
             case 10: ptr[9].convert(a9);
+            // fallthrough
+
             case 9: ptr[8].convert(a8);
+            // fallthrough
+
             case 8: ptr[7].convert(a7);
+            // fallthrough
+
             case 7: ptr[6].convert(a6);
+            // fallthrough
+
             case 6: ptr[5].convert(a5);
+            // fallthrough
+
             case 5: ptr[4].convert(a4);
+            // fallthrough
+
             case 4: ptr[3].convert(a3);
+            // fallthrough
+
             case 3: ptr[2].convert(a2);
+            // fallthrough
+
             case 2: ptr[1].convert(a1);
+            // fallthrough
+
             case 1: ptr[0].convert(a0);
+            // fallthrough
+
             }
         }
     }
     void msgpack_object(msgpack::object* o, msgpack::zone& z) const
     {
         o->type = msgpack::type::ARRAY;
-        o->via.array.ptr = static_cast<msgpack::object*>(z.allocate_align(sizeof(msgpack::object)*27));
+        o->via.array.ptr = static_cast<msgpack::object*>(z.allocate_align(sizeof(msgpack::object)*27, MSGPACK_ZONE_ALIGNOF(msgpack::object)));
         o->via.array.size = 27;
         
         o->via.array.ptr[0] = msgpack::object(a0, z);
@@ -2497,40 +3253,96 @@ struct define_array<A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, 
             switch(size) {
             default:
             case 28: ptr[27].convert(a27);
+            // fallthrough
+
             case 27: ptr[26].convert(a26);
+            // fallthrough
+
             case 26: ptr[25].convert(a25);
+            // fallthrough
+
             case 25: ptr[24].convert(a24);
+            // fallthrough
+
             case 24: ptr[23].convert(a23);
+            // fallthrough
+
             case 23: ptr[22].convert(a22);
+            // fallthrough
+
             case 22: ptr[21].convert(a21);
+            // fallthrough
+
             case 21: ptr[20].convert(a20);
+            // fallthrough
+
             case 20: ptr[19].convert(a19);
+            // fallthrough
+
             case 19: ptr[18].convert(a18);
+            // fallthrough
+
             case 18: ptr[17].convert(a17);
+            // fallthrough
+
             case 17: ptr[16].convert(a16);
+            // fallthrough
+
             case 16: ptr[15].convert(a15);
+            // fallthrough
+
             case 15: ptr[14].convert(a14);
+            // fallthrough
+
             case 14: ptr[13].convert(a13);
+            // fallthrough
+
             case 13: ptr[12].convert(a12);
+            // fallthrough
+
             case 12: ptr[11].convert(a11);
+            // fallthrough
+
             case 11: ptr[10].convert(a10);
+            // fallthrough
+
             case 10: ptr[9].convert(a9);
+            // fallthrough
+
             case 9: ptr[8].convert(a8);
+            // fallthrough
+
             case 8: ptr[7].convert(a7);
+            // fallthrough
+
             case 7: ptr[6].convert(a6);
+            // fallthrough
+
             case 6: ptr[5].convert(a5);
+            // fallthrough
+
             case 5: ptr[4].convert(a4);
+            // fallthrough
+
             case 4: ptr[3].convert(a3);
+            // fallthrough
+
             case 3: ptr[2].convert(a2);
+            // fallthrough
+
             case 2: ptr[1].convert(a1);
+            // fallthrough
+
             case 1: ptr[0].convert(a0);
+            // fallthrough
+
             }
         }
     }
     void msgpack_object(msgpack::object* o, msgpack::zone& z) const
     {
         o->type = msgpack::type::ARRAY;
-        o->via.array.ptr = static_cast<msgpack::object*>(z.allocate_align(sizeof(msgpack::object)*28));
+        o->via.array.ptr = static_cast<msgpack::object*>(z.allocate_align(sizeof(msgpack::object)*28, MSGPACK_ZONE_ALIGNOF(msgpack::object)));
         o->via.array.size = 28;
         
         o->via.array.ptr[0] = msgpack::object(a0, z);
@@ -2643,41 +3455,99 @@ struct define_array<A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, 
             switch(size) {
             default:
             case 29: ptr[28].convert(a28);
+            // fallthrough
+
             case 28: ptr[27].convert(a27);
+            // fallthrough
+
             case 27: ptr[26].convert(a26);
+            // fallthrough
+
             case 26: ptr[25].convert(a25);
+            // fallthrough
+
             case 25: ptr[24].convert(a24);
+            // fallthrough
+
             case 24: ptr[23].convert(a23);
+            // fallthrough
+
             case 23: ptr[22].convert(a22);
+            // fallthrough
+
             case 22: ptr[21].convert(a21);
+            // fallthrough
+
             case 21: ptr[20].convert(a20);
+            // fallthrough
+
             case 20: ptr[19].convert(a19);
+            // fallthrough
+
             case 19: ptr[18].convert(a18);
+            // fallthrough
+
             case 18: ptr[17].convert(a17);
+            // fallthrough
+
             case 17: ptr[16].convert(a16);
+            // fallthrough
+
             case 16: ptr[15].convert(a15);
+            // fallthrough
+
             case 15: ptr[14].convert(a14);
+            // fallthrough
+
             case 14: ptr[13].convert(a13);
+            // fallthrough
+
             case 13: ptr[12].convert(a12);
+            // fallthrough
+
             case 12: ptr[11].convert(a11);
+            // fallthrough
+
             case 11: ptr[10].convert(a10);
+            // fallthrough
+
             case 10: ptr[9].convert(a9);
+            // fallthrough
+
             case 9: ptr[8].convert(a8);
+            // fallthrough
+
             case 8: ptr[7].convert(a7);
+            // fallthrough
+
             case 7: ptr[6].convert(a6);
+            // fallthrough
+
             case 6: ptr[5].convert(a5);
+            // fallthrough
+
             case 5: ptr[4].convert(a4);
+            // fallthrough
+
             case 4: ptr[3].convert(a3);
+            // fallthrough
+
             case 3: ptr[2].convert(a2);
+            // fallthrough
+
             case 2: ptr[1].convert(a1);
+            // fallthrough
+
             case 1: ptr[0].convert(a0);
+            // fallthrough
+
             }
         }
     }
     void msgpack_object(msgpack::object* o, msgpack::zone& z) const
     {
         o->type = msgpack::type::ARRAY;
-        o->via.array.ptr = static_cast<msgpack::object*>(z.allocate_align(sizeof(msgpack::object)*29));
+        o->via.array.ptr = static_cast<msgpack::object*>(z.allocate_align(sizeof(msgpack::object)*29, MSGPACK_ZONE_ALIGNOF(msgpack::object)));
         o->via.array.size = 29;
         
         o->via.array.ptr[0] = msgpack::object(a0, z);
@@ -2793,42 +3663,102 @@ struct define_array<A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, 
             switch(size) {
             default:
             case 30: ptr[29].convert(a29);
+            // fallthrough
+
             case 29: ptr[28].convert(a28);
+            // fallthrough
+
             case 28: ptr[27].convert(a27);
+            // fallthrough
+
             case 27: ptr[26].convert(a26);
+            // fallthrough
+
             case 26: ptr[25].convert(a25);
+            // fallthrough
+
             case 25: ptr[24].convert(a24);
+            // fallthrough
+
             case 24: ptr[23].convert(a23);
+            // fallthrough
+
             case 23: ptr[22].convert(a22);
+            // fallthrough
+
             case 22: ptr[21].convert(a21);
+            // fallthrough
+
             case 21: ptr[20].convert(a20);
+            // fallthrough
+
             case 20: ptr[19].convert(a19);
+            // fallthrough
+
             case 19: ptr[18].convert(a18);
+            // fallthrough
+
             case 18: ptr[17].convert(a17);
+            // fallthrough
+
             case 17: ptr[16].convert(a16);
+            // fallthrough
+
             case 16: ptr[15].convert(a15);
+            // fallthrough
+
             case 15: ptr[14].convert(a14);
+            // fallthrough
+
             case 14: ptr[13].convert(a13);
+            // fallthrough
+
             case 13: ptr[12].convert(a12);
+            // fallthrough
+
             case 12: ptr[11].convert(a11);
+            // fallthrough
+
             case 11: ptr[10].convert(a10);
+            // fallthrough
+
             case 10: ptr[9].convert(a9);
+            // fallthrough
+
             case 9: ptr[8].convert(a8);
+            // fallthrough
+
             case 8: ptr[7].convert(a7);
+            // fallthrough
+
             case 7: ptr[6].convert(a6);
+            // fallthrough
+
             case 6: ptr[5].convert(a5);
+            // fallthrough
+
             case 5: ptr[4].convert(a4);
+            // fallthrough
+
             case 4: ptr[3].convert(a3);
+            // fallthrough
+
             case 3: ptr[2].convert(a2);
+            // fallthrough
+
             case 2: ptr[1].convert(a1);
+            // fallthrough
+
             case 1: ptr[0].convert(a0);
+            // fallthrough
+
             }
         }
     }
     void msgpack_object(msgpack::object* o, msgpack::zone& z) const
     {
         o->type = msgpack::type::ARRAY;
-        o->via.array.ptr = static_cast<msgpack::object*>(z.allocate_align(sizeof(msgpack::object)*30));
+        o->via.array.ptr = static_cast<msgpack::object*>(z.allocate_align(sizeof(msgpack::object)*30, MSGPACK_ZONE_ALIGNOF(msgpack::object)));
         o->via.array.size = 30;
         
         o->via.array.ptr[0] = msgpack::object(a0, z);
@@ -2947,43 +3877,105 @@ struct define_array<A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, 
             switch(size) {
             default:
             case 31: ptr[30].convert(a30);
+            // fallthrough
+
             case 30: ptr[29].convert(a29);
+            // fallthrough
+
             case 29: ptr[28].convert(a28);
+            // fallthrough
+
             case 28: ptr[27].convert(a27);
+            // fallthrough
+
             case 27: ptr[26].convert(a26);
+            // fallthrough
+
             case 26: ptr[25].convert(a25);
+            // fallthrough
+
             case 25: ptr[24].convert(a24);
+            // fallthrough
+
             case 24: ptr[23].convert(a23);
+            // fallthrough
+
             case 23: ptr[22].convert(a22);
+            // fallthrough
+
             case 22: ptr[21].convert(a21);
+            // fallthrough
+
             case 21: ptr[20].convert(a20);
+            // fallthrough
+
             case 20: ptr[19].convert(a19);
+            // fallthrough
+
             case 19: ptr[18].convert(a18);
+            // fallthrough
+
             case 18: ptr[17].convert(a17);
+            // fallthrough
+
             case 17: ptr[16].convert(a16);
+            // fallthrough
+
             case 16: ptr[15].convert(a15);
+            // fallthrough
+
             case 15: ptr[14].convert(a14);
+            // fallthrough
+
             case 14: ptr[13].convert(a13);
+            // fallthrough
+
             case 13: ptr[12].convert(a12);
+            // fallthrough
+
             case 12: ptr[11].convert(a11);
+            // fallthrough
+
             case 11: ptr[10].convert(a10);
+            // fallthrough
+
             case 10: ptr[9].convert(a9);
+            // fallthrough
+
             case 9: ptr[8].convert(a8);
+            // fallthrough
+
             case 8: ptr[7].convert(a7);
+            // fallthrough
+
             case 7: ptr[6].convert(a6);
+            // fallthrough
+
             case 6: ptr[5].convert(a5);
+            // fallthrough
+
             case 5: ptr[4].convert(a4);
+            // fallthrough
+
             case 4: ptr[3].convert(a3);
+            // fallthrough
+
             case 3: ptr[2].convert(a2);
+            // fallthrough
+
             case 2: ptr[1].convert(a1);
+            // fallthrough
+
             case 1: ptr[0].convert(a0);
+            // fallthrough
+
             }
         }
     }
     void msgpack_object(msgpack::object* o, msgpack::zone& z) const
     {
         o->type = msgpack::type::ARRAY;
-        o->via.array.ptr = static_cast<msgpack::object*>(z.allocate_align(sizeof(msgpack::object)*31));
+        o->via.array.ptr = static_cast<msgpack::object*>(z.allocate_align(sizeof(msgpack::object)*31, MSGPACK_ZONE_ALIGNOF(msgpack::object)));
         o->via.array.size = 31;
         
         o->via.array.ptr[0] = msgpack::object(a0, z);
@@ -3105,44 +4097,108 @@ struct define_array<A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, 
             switch(size) {
             default:
             case 32: ptr[31].convert(a31);
+            // fallthrough
+
             case 31: ptr[30].convert(a30);
+            // fallthrough
+
             case 30: ptr[29].convert(a29);
+            // fallthrough
+
             case 29: ptr[28].convert(a28);
+            // fallthrough
+
             case 28: ptr[27].convert(a27);
+            // fallthrough
+
             case 27: ptr[26].convert(a26);
+            // fallthrough
+
             case 26: ptr[25].convert(a25);
+            // fallthrough
+
             case 25: ptr[24].convert(a24);
+            // fallthrough
+
             case 24: ptr[23].convert(a23);
+            // fallthrough
+
             case 23: ptr[22].convert(a22);
+            // fallthrough
+
             case 22: ptr[21].convert(a21);
+            // fallthrough
+
             case 21: ptr[20].convert(a20);
+            // fallthrough
+
             case 20: ptr[19].convert(a19);
+            // fallthrough
+
             case 19: ptr[18].convert(a18);
+            // fallthrough
+
             case 18: ptr[17].convert(a17);
+            // fallthrough
+
             case 17: ptr[16].convert(a16);
+            // fallthrough
+
             case 16: ptr[15].convert(a15);
+            // fallthrough
+
             case 15: ptr[14].convert(a14);
+            // fallthrough
+
             case 14: ptr[13].convert(a13);
+            // fallthrough
+
             case 13: ptr[12].convert(a12);
+            // fallthrough
+
             case 12: ptr[11].convert(a11);
+            // fallthrough
+
             case 11: ptr[10].convert(a10);
+            // fallthrough
+
             case 10: ptr[9].convert(a9);
+            // fallthrough
+
             case 9: ptr[8].convert(a8);
+            // fallthrough
+
             case 8: ptr[7].convert(a7);
+            // fallthrough
+
             case 7: ptr[6].convert(a6);
+            // fallthrough
+
             case 6: ptr[5].convert(a5);
+            // fallthrough
+
             case 5: ptr[4].convert(a4);
+            // fallthrough
+
             case 4: ptr[3].convert(a3);
+            // fallthrough
+
             case 3: ptr[2].convert(a2);
+            // fallthrough
+
             case 2: ptr[1].convert(a1);
+            // fallthrough
+
             case 1: ptr[0].convert(a0);
+            // fallthrough
+
             }
         }
     }
     void msgpack_object(msgpack::object* o, msgpack::zone& z) const
     {
         o->type = msgpack::type::ARRAY;
-        o->via.array.ptr = static_cast<msgpack::object*>(z.allocate_align(sizeof(msgpack::object)*32));
+        o->via.array.ptr = static_cast<msgpack::object*>(z.allocate_align(sizeof(msgpack::object)*32, MSGPACK_ZONE_ALIGNOF(msgpack::object)));
         o->via.array.size = 32;
         
         o->via.array.ptr[0] = msgpack::object(a0, z);

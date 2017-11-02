@@ -13,7 +13,7 @@
 #include "zone.h"
 #include <stdlib.h>
 
-#ifndef _WIN32
+#if defined(unix) || defined(__unix) || defined(__APPLE__) || defined(__OpenBSD__) || defined(__QNX__) || defined(__QNXTO__)
 #include <sys/uio.h>
 #else
 struct iovec {

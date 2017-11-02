@@ -30,9 +30,11 @@ namespace type {
         BOOLEAN             = MSGPACK_OBJECT_BOOLEAN,
         POSITIVE_INTEGER    = MSGPACK_OBJECT_POSITIVE_INTEGER,
         NEGATIVE_INTEGER    = MSGPACK_OBJECT_NEGATIVE_INTEGER,
+        FLOAT32             = MSGPACK_OBJECT_FLOAT32,
+        FLOAT64             = MSGPACK_OBJECT_FLOAT64,
         FLOAT               = MSGPACK_OBJECT_FLOAT,
 #if defined(MSGPACK_USE_LEGACY_NAME_AS_FLOAT)
-        DOUBLE              = MSGPACK_OBJECT_DOUBLE, // obsolete
+        DOUBLE              = MSGPACK_DEPRECATED("please use FLOAT64 instead") MSGPACK_OBJECT_DOUBLE, // obsolete
 #endif // MSGPACK_USE_LEGACY_NAME_AS_FLOAT
         STR                 = MSGPACK_OBJECT_STR,
         BIN                 = MSGPACK_OBJECT_BIN,

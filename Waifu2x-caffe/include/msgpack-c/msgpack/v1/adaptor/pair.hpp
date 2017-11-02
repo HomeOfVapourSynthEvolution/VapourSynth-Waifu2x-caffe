@@ -28,7 +28,7 @@ namespace adaptor {
 
 template <typename T1, typename T2>
 struct as<std::pair<T1, T2>,
-          typename std::enable_if<msgpack::all_of<msgpack::has_as, T1, T2>::value>::type> {
+          typename std::enable_if<msgpack::any_of<msgpack::has_as, T1, T2>::value>::type> {
     std::pair<T1, T2> operator()(msgpack::object const& o) const {
         if (o.type != msgpack::type::ARRAY) { throw msgpack::type_error(); }
         if (o.via.array.size != 2) { throw msgpack::type_error(); }
@@ -64,7 +64,7 @@ template <typename T1, typename T2>
 struct object_with_zone<std::pair<T1, T2> > {
     void operator()(msgpack::object::with_zone& o, const std::pair<T1, T2>& v) const {
         o.type = msgpack::type::ARRAY;
-        msgpack::object* p = static_cast<msgpack::object*>(o.zone.allocate_align(sizeof(msgpack::object)*2));
+        msgpack::object* p = static_cast<msgpack::object*>(o.zone.allocate_align(sizeof(msgpack::object)*2, MSGPACK_ZONE_ALIGNOF(msgpack::object)));
         o.via.array.ptr = p;
         o.via.array.size = 2;
         p[0] = msgpack::object(v.first, o.zone);
