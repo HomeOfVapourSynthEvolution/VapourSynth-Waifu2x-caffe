@@ -33,7 +33,7 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <IncludePath>include;include\msgpack-c;C:\boost_1_65_1;C:\caffe\install\include;C:\caffe\install\gflags\include;C:\caffe\install\glog\include;C:\caffe\install\protobuf\include;C:\caffe\install\zlib\include;C:\opencv\install\include;$(CUDA_PATH)\include;C:\Program Files %28x86%29\IntelSWTools\compilers_and_libraries\windows\mkl\include;C:\Program Files %28x86%29\VapourSynth\sdk\include\vapoursynth;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\boost_1_65_1\lib64-msvc-14.1;C:\caffe\install\lib;C:\caffe\install\gflags\Lib;C:\caffe\install\glog\lib;C:\caffe\install\hdf5\lib;C:\caffe\install\protobuf\lib;C:\caffe\install\zlib\lib;C:\opencv\install\x64\vc14\staticlib;$(CUDA_PATH)\lib\x64;C:\Program Files %28x86%29\IntelSWTools\compilers_and_libraries_2017.4.210\windows\mkl\lib\intel64_win;$(LibraryPath)</LibraryPath>
+    <LibraryPath>C:\boost_1_65_1\lib64-msvc-14.1;C:\caffe\install\lib;C:\caffe\install\gflags\Lib;C:\caffe\install\glog\lib;C:\caffe\install\hdf5\lib;C:\caffe\install\protobuf\lib;C:\caffe\install\zlib\lib;C:\opencv\install\x64\vc15\staticlib;$(CUDA_PATH)\lib\x64;C:\Program Files %28x86%29\IntelSWTools\compilers_and_libraries_2017.4.210\windows\mkl\lib\intel64_win;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -51,7 +51,7 @@
       <SubSystem>Windows</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>libboost_filesystem-vc141-mt-1_65_1.lib;libboost_iostreams-vc141-mt-1_65_1.lib;libboost_system-vc141-mt-1_65_1.lib;libboost_thread-vc141-mt-1_65_1.lib;caffe.lib;proto.lib;gflags_static.lib;glog.lib;libhdf5.lib;libhdf5_hl.lib;libprotobuf.lib;zlibstatic.lib;IlmImf.lib;ipp_iw.lib;ippicvmt.lib;libjasper.lib;libjpeg.lib;libpng.lib;libtiff.lib;libwebp.lib;opencv_world320.lib;cublas.lib;cudart_static.lib;curand.lib;cudnn.lib;mkl_core.lib;mkl_intel_lp64.lib;mkl_intel_thread.lib;libmmds.lib;shlwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>libboost_filesystem-vc141-mt-1_65_1.lib;libboost_iostreams-vc141-mt-1_65_1.lib;libboost_system-vc141-mt-1_65_1.lib;libboost_thread-vc141-mt-1_65_1.lib;caffe.lib;proto.lib;gflags_static.lib;glog.lib;libhdf5.lib;libhdf5_hl.lib;libprotobuf.lib;zlibstatic.lib;IlmImf.lib;ippicvmt.lib;ippiw.lib;ittnotify.lib;libjasper.lib;libjpeg.lib;libpng.lib;libtiff.lib;libwebp.lib;opencv_world331.lib;cublas.lib;cudart_static.lib;curand.lib;cudnn.lib;mkl_core.lib;mkl_intel_lp64.lib;mkl_intel_thread.lib;libmmds.lib;shlwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
