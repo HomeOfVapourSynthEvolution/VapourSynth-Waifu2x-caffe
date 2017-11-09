@@ -9,7 +9,7 @@ Note
 
 The folder `models` must be located in the same folder as `Waifu2x-caffe.dll`.
 
-Requires `cudnn64_6.dll` (cuDNN v6.0) to be in the search path. Due to the license of cuDNN, I can't distribute the required dll file. You have to register and download yourself at https://developer.nvidia.com/cudnn.
+Requires `cudnn64_7.dll` (cuDNN v7.0) to be in the search path. Due to the license of cuDNN, I can't distribute the required dll file. You have to register and download yourself at https://developer.nvidia.com/cudnn.
 
 
 Usage
@@ -49,7 +49,7 @@ Usage
 Compilation
 ===========
 
-Requires [customized Caffe library](https://github.com/HolyWu/caffe). To build `Caffe`, you must have all the dependencies: `CUDA Toolkit 8`, `cuDNN 6`, `OpenBLAS`, `Boost`, `protobuf`, `glog`, `gflags`, `HDF5`, and `OpenCV 3`. The defaults in `Makefile.config` should work, but modify the relevant lines if it doesn't (`CUDA_DIR` especially). Then just type `make all -j4` to compile `Caffe`.
+Requires [customized Caffe library](https://github.com/HolyWu/caffe). To build `Caffe`, you must have all the dependencies: `CUDA Toolkit 9`, `cuDNN 7`, `OpenBLAS`, `Boost`, `protobuf`, `glog`, `gflags`, `HDF5`, and `OpenCV 3`. The defaults in `Makefile.config` should work, but modify the relevant lines if it doesn't (`CUDA_DIR` especially). Then just type `make all -j4` to compile `Caffe`.
 
 ```
 ./autogen.sh

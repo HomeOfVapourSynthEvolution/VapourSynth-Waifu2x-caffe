@@ -1,4 +1,4 @@
-AC_INIT([Waifu2x-caffe], [8], [https://github.com/HomeOfVapourSynthEvolution/VapourSynth-Waifu2x-caffe/issues], [Waifu2x-caffe], [https://github.com/HomeOfVapourSynthEvolution/VapourSynth-Waifu2x-caffe/])
+AC_INIT([Waifu2x-caffe], [9], [https://github.com/HomeOfVapourSynthEvolution/VapourSynth-Waifu2x-caffe/issues], [Waifu2x-caffe], [https://github.com/HomeOfVapourSynthEvolution/VapourSynth-Waifu2x-caffe/])
 
 : ${CXXFLAGS=""}
 

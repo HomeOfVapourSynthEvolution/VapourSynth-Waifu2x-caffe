@@ -25,9 +25,10 @@
 #include <cmath>
 #include <string>
 
-#include <caffe/caffe.hpp>
 #include <VapourSynth.h>
 #include <VSHelper.h>
+
+#include <caffe/caffe.hpp>
 
 #include "waifu2x.h"
 
@@ -40,11 +41,11 @@ struct Waifu2xData {
     Waifu2x * waifu2x;
 };
 
-static bool isPowerOf2(const int i) {
+static bool isPowerOf2(const int i) noexcept {
     return i && !(i & (i - 1));
 }
 
-static Waifu2x::eWaifu2xError process(const VSFrameRef * src, VSFrameRef * dst, Waifu2xData * VS_RESTRICT d, const VSAPI * vsapi) {
+static Waifu2x::eWaifu2xError process(const VSFrameRef * src, VSFrameRef * dst, Waifu2xData * VS_RESTRICT d, const VSAPI * vsapi) noexcept {
     if (d->vi.format->colorFamily == cmRGB) {
         const unsigned width = vsapi->getFrameWidth(src, 0);
         const unsigned height = vsapi->getFrameHeight(src, 0);
@@ -188,7 +189,7 @@ static void VS_CC waifu2xFree(void *instanceData, VSCore *core, const VSAPI *vsa
 }
 
 static void VS_CC waifu2xCreate(const VSMap *in, VSMap *out, void *userData, VSCore *core, const VSAPI *vsapi) {
-    char * argv[]{ "" };
+    char * argv[] = { "" };
     Waifu2x::init_liblary(1, argv);
 
     Waifu2xData d{};
@@ -201,6 +202,9 @@ static void VS_CC waifu2xCreate(const VSMap *in, VSMap *out, void *userData, VSC
     unsigned iterTimesTwiceScaling;
 
     try {
+        if (!isConstantFormat(&d.vi) || d.vi.format->sampleType != stFloat || d.vi.format->bitsPerSample != 32)
+            throw std::string{ "only constant format 32 bit float input supported" };
+
         const int noise = int64ToIntS(vsapi->propGetInt(in, "noise", 0, &err));
 
         d.scale = int64ToIntS(vsapi->propGetInt(in, "scale", 0, &err));
@@ -232,9 +236,6 @@ static void VS_CC waifu2xCreate(const VSMap *in, VSMap *out, void *userData, VSC
             vsapi->freeNode(d.node);
             return;
         }
-
-        if (!isConstantFormat(&d.vi) || d.vi.format->sampleType != stFloat || d.vi.format->bitsPerSample != 32)
-            throw std::string{ "only constant format 32-bit float input supported" };
 
         if (noise < -1 || noise > 3)
             throw std::string{ "noise must be -1, 0, 1, 2 or 3" };
