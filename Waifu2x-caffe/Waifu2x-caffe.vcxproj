@@ -8,16 +8,17 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <UseNativeEnvironment>true</UseNativeEnvironment>
+    <VCProjectVersion>15.0</VCProjectVersion>
     <ProjectGuid>{F33F21BF-A671-4106-82E1-0DFC3B6BD411}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>Waifu2xcaffe</RootNamespace>
-    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>Intel C++ Compiler 17.0</PlatformToolset>
+    <PlatformToolset>Intel C++ Compiler 18.0</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
@@ -31,7 +32,7 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>include;include\msgpack-c;C:\boost_1_64_0;C:\caffe\install\include;C:\caffe\install\gflags\Include;C:\caffe\install\glog\include;C:\caffe\install\hdf5\include;C:\caffe\install\protobuf\include;C:\caffe\install\zlib\include;C:\opencv\install\include;$(CUDA_PATH)\include;C:\Program Files %28x86%29\IntelSWTools\compilers_and_libraries\windows\mkl\include;C:\Program Files %28x86%29\VapourSynth\sdk\include\vapoursynth;$(IncludePath)</IncludePath>
+    <IncludePath>include;include\msgpack-c;C:\boost_1_64_0;C:\caffe\install\include;C:\caffe\install\gflags\include;C:\caffe\install\glog\include;C:\caffe\install\protobuf\include;C:\caffe\install\zlib\include;C:\opencv\install\include;$(CUDA_PATH)\include;C:\Program Files %28x86%29\IntelSWTools\compilers_and_libraries\windows\mkl\include;C:\Program Files %28x86%29\VapourSynth\sdk\include\vapoursynth;$(IncludePath)</IncludePath>
     <LibraryPath>C:\boost_1_64_0\lib64-msvc-14.0;C:\caffe\install\lib;C:\caffe\install\gflags\Lib;C:\caffe\install\glog\lib;C:\caffe\install\hdf5\lib;C:\caffe\install\protobuf\lib;C:\caffe\install\zlib\lib;C:\opencv\install\x64\vc14\staticlib;$(CUDA_PATH)\lib\x64;C:\Program Files %28x86%29\IntelSWTools\compilers_and_libraries_2017.4.210\windows\mkl\lib\intel64_win;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -40,7 +41,7 @@
       <WarningLevel>Level3</WarningLevel>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <Optimization>MaxSpeedHighLevel</Optimization>
-      <UseIntelOptimizedHeaders>true</UseIntelOptimizedHeaders>
+      <FloatingPointModel>Fast</FloatingPointModel>
       <EnforceTypeConversionRules>true</EnforceTypeConversionRules>
       <OpenMP>GenerateParallelCode</OpenMP>
       <EnableAnsiAliasing>true</EnableAnsiAliasing>
