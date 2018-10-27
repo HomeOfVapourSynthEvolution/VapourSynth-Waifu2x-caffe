@@ -174,7 +174,7 @@ cNet::cNet() : mModelScale(0), mInnerScale(0), mNetOffset(0), mInputPlane(0), mH
 cNet::~cNet()
 {}
 
-Waifu2x::eWaifu2xError cNet::GetInfo(const boost::filesystem::path & info_path, stInfo &info)
+Waifu2x::eWaifu2xError cNet::GetInfo(const boost::filesystem::path & info_path, Waifu2x::stInfo &info)
 {
 	rapidjson::Document d;
 	std::vector<char> jsonBuf;
@@ -191,11 +191,13 @@ Waifu2x::eWaifu2xError cNet::GetInfo(const boost::filesystem::path & info_path, 
 		const auto arch_name = d["arch_name"].GetString();
 		const bool has_noise_scale = d.HasMember("has_noise_scale") && d["has_noise_scale"].GetBool() ? true : false;
 		const int channels = d["channels"].GetInt();
+		const int recommended_crop_size = d.HasMember("recommended_crop_size") ? d["recommended_crop_size"].GetInt() : -1;
 
 		info.name = name;
 		info.arch_name = arch_name;
 		info.has_noise_scale = has_noise_scale;
 		info.channels = channels;
+		info.recommended_crop_size = recommended_crop_size;
 
 		if (d.HasMember("offset"))
 		{
@@ -261,7 +263,7 @@ Waifu2x::eWaifu2xError cNet::GetInfo(const boost::filesystem::path & info_path, 
 
 // モデルファイルからネットワークを構築
 // processでcudnnが指定されなかった場合はcuDNNが呼び出されないように変更する
-Waifu2x::eWaifu2xError cNet::ConstractNet(const Waifu2x::eWaifu2xModelType mode, const boost::filesystem::path &model_path, const boost::filesystem::path &param_path, const stInfo &info, const std::string &process)
+Waifu2x::eWaifu2xError cNet::ConstractNet(const Waifu2x::eWaifu2xModelType mode, const boost::filesystem::path &model_path, const boost::filesystem::path &param_path, const Waifu2x::stInfo &info, const std::string &process)
 {
 	Waifu2x::eWaifu2xError ret;
 
@@ -280,8 +282,20 @@ Waifu2x::eWaifu2xError cNet::ConstractNet(const Waifu2x::eWaifu2xModelType mode,
 	const auto retModelBin = readProtoBinary(modelbin_path, &param_model);
 	const auto retParamBin = readProtoBinary(caffemodel_path, &param_caffemodel);
 
-	if (retModelBin == Waifu2x::eWaifu2xError_OK && retParamBin == Waifu2x::eWaifu2xError_OK)
+	if ( retParamBin == Waifu2x::eWaifu2xError_OK &&
+		(retModelBin == Waifu2x::eWaifu2xError_OK || retModelBin == Waifu2x::eWaifu2xError_FailedOpenModelFile))
 	{
+		if (retModelBin == Waifu2x::eWaifu2xError_FailedOpenModelFile) // protobinのみが読み込めなかったときはprototxtから読み込む(ついでにprotobinも書き込む)
+		{
+			ret = readProtoText(model_path, &param_model);
+			if (ret != Waifu2x::eWaifu2xError_OK)
+				return ret;
+
+			ret = writeProtoBinary(param_model, modelbin_path);
+			if (ret != Waifu2x::eWaifu2xError_OK)
+				return ret;
+		}
+
 		ret = SetParameter(param_model, process);
 		if (ret != Waifu2x::eWaifu2xError_OK)
 			return ret;
@@ -309,11 +323,11 @@ Waifu2x::eWaifu2xError cNet::ConstractNet(const Waifu2x::eWaifu2xModelType mode,
 	return Waifu2x::eWaifu2xError_OK;
 }
 
-void cNet::LoadParamFromInfo(const Waifu2x::eWaifu2xModelType mode, const stInfo &info)
+void cNet::LoadParamFromInfo(const Waifu2x::eWaifu2xModelType mode, const Waifu2x::stInfo &info)
 {
 	mModelScale = 2; // TODO: 動的に設定するようにする
 
-	stInfo::stParam param;
+	Waifu2x::stInfo::stParam param;
 
 	switch (mode)
 	{
@@ -375,6 +389,13 @@ Waifu2x::eWaifu2xError cNet::SetParameter(caffe::NetParameter &param, const std:
 				layer_param->mutable_relu_param()->set_engine(caffe::ReLUParameter_Engine_CUDNN);
 			else
 				layer_param->mutable_relu_param()->set_engine(caffe::ReLUParameter_Engine_CAFFE);
+		}
+		else if (type == "Sigmoid")
+		{
+			if (process == "cudnn")
+				layer_param->mutable_sigmoid_param()->set_engine(caffe::SigmoidParameter_Engine_CUDNN);
+			else
+				layer_param->mutable_sigmoid_param()->set_engine(caffe::SigmoidParameter_Engine_CAFFE);
 		}
 	}
 
@@ -812,7 +833,7 @@ std::string cNet::GetModelName(const boost::filesystem::path &info_path)
 {
 	Waifu2x::eWaifu2xError ret;
 
-	stInfo info;
+	Waifu2x::stInfo info;
 	ret = GetInfo(info_path, info);
 	if (ret != Waifu2x::eWaifu2xError_OK)
 		return std::string();
