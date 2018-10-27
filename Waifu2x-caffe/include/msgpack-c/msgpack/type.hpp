@@ -34,6 +34,7 @@
 #include "adaptor/cpp11/array.hpp"
 #include "adaptor/cpp11/array_char.hpp"
 #include "adaptor/cpp11/array_unsigned_char.hpp"
+#include "adaptor/cpp11/chrono.hpp"
 #include "adaptor/cpp11/forward_list.hpp"
 #include "adaptor/cpp11/reference_wrapper.hpp"
 #include "adaptor/cpp11/shared_ptr.hpp"
@@ -42,12 +43,17 @@
 #include "adaptor/cpp11/unordered_map.hpp"
 #include "adaptor/cpp11/unordered_set.hpp"
 
-#if __cplusplus >= 201703
-
+#if MSGPACK_HAS_INCLUDE(<optional>)
 #include "adaptor/cpp17/optional.hpp"
-#include "adaptor/cpp17/string_view.hpp"
+#endif // MSGPACK_HAS_INCLUDE(<optional>)
 
-#endif // __cplusplus >= 201703
+#if MSGPACK_HAS_INCLUDE(<string_view>)
+#include "adaptor/cpp17/string_view.hpp"
+#endif // MSGPACK_HAS_INCLUDE(<string_view>)
+
+#include "adaptor/cpp17/byte.hpp"
+#include "adaptor/cpp17/carray_byte.hpp"
+#include "adaptor/cpp17/vector_byte.hpp"
 
 #endif // defined(MSGPACK_USE_CPP03)
 

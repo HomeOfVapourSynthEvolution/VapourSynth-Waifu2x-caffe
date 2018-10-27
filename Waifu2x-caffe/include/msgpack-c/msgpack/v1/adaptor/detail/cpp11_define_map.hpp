@@ -11,6 +11,7 @@
 #define MSGPACK_V1_CPP11_DEFINE_MAP_HPP
 
 #include "msgpack/v1/adaptor/detail/cpp11_define_map_decl.hpp"
+#include "msgpack/v1/adaptor/detail/cpp11_convert_helper.hpp"
 
 #include <tuple>
 #include <map>
@@ -34,7 +35,7 @@ struct define_map_imp {
         define_map_imp<Tuple, N-2>::unpack(o, t, kvmap);
         auto it = kvmap.find(std::get<N-2>(t));
         if (it != kvmap.end()) {
-            it->second->convert(std::get<N-1>(t));
+            convert_helper(*it->second, std::get<N-1>(t));
         }
     }
     static void object(msgpack::object* o, msgpack::zone& z, Tuple const& t) {
@@ -71,6 +72,7 @@ struct define_map {
         if(o.type != msgpack::type::MAP) { throw msgpack::type_error(); }
         std::map<std::string, msgpack::object const*> kvmap;
         for (uint32_t i = 0; i < o.via.map.size; ++i) {
+            if (o.via.map.ptr[i].key.type != msgpack::type::STR) { throw msgpack::type_error(); }
             kvmap.emplace(
                 std::string(
                     o.via.map.ptr[i].key.via.str.ptr,
