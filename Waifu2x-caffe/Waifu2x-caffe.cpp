@@ -254,8 +254,8 @@ static void VS_CC waifu2xCreate(const VSMap *in, VSMap *out, void *userData, VSC
         if (d.blockHeight < 1)
             throw std::string{ "block_h must be greater than or equal to 1" };
 
-        if (model < 0 || model > 4)
-            throw std::string{ "model must be 0, 1, 2, 3, or 4" };
+        if (model < 0 || model > 5)
+            throw std::string{ "model must be 0, 1, 2, 3, 4, or 5" };
 
         if (processor < 0)
             throw std::string{ "processor must be greater than or equal to 0" };
@@ -296,8 +296,10 @@ static void VS_CC waifu2xCreate(const VSMap *in, VSMap *out, void *userData, VSC
             modelPath += "/models/photo";
         else if (model == 3)
             modelPath += "/models/upconv_7_anime_style_art_rgb";
-        else
+        else if (model == 4)
             modelPath += "/models/upconv_7_photo";
+        else
+            modelPath += "/models/upresnet10";
 
         d.waifu2x = new Waifu2x{};
 

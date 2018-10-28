@@ -36,8 +36,9 @@ Usage
   * 0 = anime_style_art (for 2D illustration)
   * 1 = anime_style_art_rgb (for 2D illustration)
   * 2 = photo (for photo and anime)
-  * 3 = upconv_7_anime_style_art_rgb (has much faster speed and slightly higher memory consumption than `anime_style_art_rgb`, with similar or probably better quality)
-  * 4 = upconv_7_photo (has much faster speed and slightly higher memory consumption than `photo`, with similar or probably better quality)
+  * 3 = upconv_7_anime_style_art_rgb (has faster speed than `anime_style_art_rgb`, with equal or better quality)
+  * 4 = upconv_7_photo (has faster speed than `photo`, with equal or better quality)
+  * 5 = upresnet10 (for 2D illustration). Note that the result will change when the block size is changed. The recommended block size is 38 for this model.
 
 * cudnn: When set to true, it uses cuDNN for processing. When set to false, CUDA will be used instead.
 
