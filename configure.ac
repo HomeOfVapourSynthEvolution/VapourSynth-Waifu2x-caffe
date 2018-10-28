@@ -1,4 +1,4 @@
-AC_INIT([Waifu2x-caffe], [9], [https://github.com/HomeOfVapourSynthEvolution/VapourSynth-Waifu2x-caffe/issues], [Waifu2x-caffe], [https://github.com/HomeOfVapourSynthEvolution/VapourSynth-Waifu2x-caffe/])
+AC_INIT([Waifu2x-caffe], [10], [https://github.com/HomeOfVapourSynthEvolution/VapourSynth-Waifu2x-caffe/issues], [Waifu2x-caffe], [https://github.com/HomeOfVapourSynthEvolution/VapourSynth-Waifu2x-caffe/])
 
 : ${CXXFLAGS=""}
 
@@ -7,9 +7,9 @@ AM_SILENT_RULES([yes])
 
 LT_INIT([disable-static win32-dll])
 
-AC_PROG_CXX
-
 AC_CANONICAL_HOST
+
+AC_PROG_CXX
 
 
 X86="false"
