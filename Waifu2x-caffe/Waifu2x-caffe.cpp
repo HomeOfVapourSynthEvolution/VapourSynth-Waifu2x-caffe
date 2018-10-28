@@ -1,7 +1,7 @@
 /*
   The MIT License (MIT)
 
-  Copyright (c) 2016 HolyWu
+  Copyright (c) 2016-2018 HolyWu
 
   Permission is hereby granted, free of charge, to any person obtaining a copy
   of this software and associated documentation files (the "Software"), to deal
@@ -45,12 +45,12 @@ static bool isPowerOf2(const int i) noexcept {
     return i && !(i & (i - 1));
 }
 
-static Waifu2x::eWaifu2xError process(const VSFrameRef * src, VSFrameRef * dst, Waifu2xData * VS_RESTRICT d, const VSAPI * vsapi) noexcept {
+static Waifu2x::eWaifu2xError filter(const VSFrameRef * src, VSFrameRef * dst, Waifu2xData * const VS_RESTRICT d, const VSAPI * vsapi) noexcept {
     if (d->vi.format->colorFamily == cmRGB) {
-        const unsigned width = vsapi->getFrameWidth(src, 0);
-        const unsigned height = vsapi->getFrameHeight(src, 0);
-        const unsigned srcStride = vsapi->getStride(src, 0) / sizeof(float);
-        const unsigned dstStride = vsapi->getStride(dst, 0) / sizeof(float);
+        const int width = vsapi->getFrameWidth(src, 0);
+        const int height = vsapi->getFrameHeight(src, 0);
+        const int srcStride = vsapi->getStride(src, 0) / sizeof(float);
+        const int dstStride = vsapi->getStride(dst, 0) / sizeof(float);
         const float * srcpR = reinterpret_cast<const float *>(vsapi->getReadPtr(src, 0));
         const float * srcpG = reinterpret_cast<const float *>(vsapi->getReadPtr(src, 1));
         const float * srcpB = reinterpret_cast<const float *>(vsapi->getReadPtr(src, 2));
@@ -58,10 +58,10 @@ static Waifu2x::eWaifu2xError process(const VSFrameRef * src, VSFrameRef * dst, 
         float * VS_RESTRICT dstpG = reinterpret_cast<float *>(vsapi->getWritePtr(dst, 1));
         float * VS_RESTRICT dstpB = reinterpret_cast<float *>(vsapi->getWritePtr(dst, 2));
 
-        for (unsigned y = 0; y < height; y++) {
-            for (unsigned x = 0; x < width; x++) {
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
                 const unsigned pos = (width * y + x) * 3;
-                d->srcInterleaved[pos] = srcpR[x];
+                d->srcInterleaved[pos + 0] = srcpR[x];
                 d->srcInterleaved[pos + 1] = srcpG[x];
                 d->srcInterleaved[pos + 2] = srcpB[x];
             }
@@ -76,10 +76,10 @@ static Waifu2x::eWaifu2xError process(const VSFrameRef * src, VSFrameRef * dst, 
         if (waifu2xError != Waifu2x::eWaifu2xError_OK)
             return waifu2xError;
 
-        for (unsigned y = 0; y < d->vi.height; y++) {
-            for (unsigned x = 0; x < d->vi.width; x++) {
+        for (int y = 0; y < d->vi.height; y++) {
+            for (int x = 0; x < d->vi.width; x++) {
                 const unsigned pos = (d->vi.width * y + x) * 3;
-                dstpR[x] = d->dstInterleaved[pos];
+                dstpR[x] = d->dstInterleaved[pos + 0];
                 dstpG[x] = d->dstInterleaved[pos + 1];
                 dstpB[x] = d->dstInterleaved[pos + 2];
             }
@@ -89,13 +89,13 @@ static Waifu2x::eWaifu2xError process(const VSFrameRef * src, VSFrameRef * dst, 
             dstpB += dstStride;
         }
     } else {
-        for (unsigned plane = 0; plane < d->vi.format->numPlanes; plane++) {
-            const unsigned srcWidth = vsapi->getFrameWidth(src, plane);
-            const unsigned dstWidth = vsapi->getFrameWidth(dst, plane);
-            const unsigned srcHeight = vsapi->getFrameHeight(src, plane);
-            const unsigned dstHeight = vsapi->getFrameHeight(dst, plane);
-            const unsigned srcStride = vsapi->getStride(src, plane) / sizeof(float);
-            const unsigned dstStride = vsapi->getStride(dst, plane) / sizeof(float);
+        for (int plane = 0; plane < d->vi.format->numPlanes; plane++) {
+            const int srcWidth = vsapi->getFrameWidth(src, plane);
+            const int dstWidth = vsapi->getFrameWidth(dst, plane);
+            const int srcHeight = vsapi->getFrameHeight(src, plane);
+            const int dstHeight = vsapi->getFrameHeight(dst, plane);
+            const int srcStride = vsapi->getStride(src, plane) / sizeof(float);
+            const int dstStride = vsapi->getStride(dst, plane) / sizeof(float);
             const float * srcp = reinterpret_cast<const float *>(vsapi->getReadPtr(src, plane));
             float * VS_RESTRICT dstp = reinterpret_cast<float *>(vsapi->getWritePtr(dst, plane));
 
@@ -108,8 +108,8 @@ static Waifu2x::eWaifu2xError process(const VSFrameRef * src, VSFrameRef * dst, 
                 const float * input = srcp;
                 float * VS_RESTRICT output = d->buffer;
 
-                for (unsigned y = 0; y < srcHeight; y++) {
-                    for (unsigned x = 0; x < srcWidth; x++)
+                for (int y = 0; y < srcHeight; y++) {
+                    for (int x = 0; x < srcWidth; x++)
                         output[x] = input[x] + 0.5f;
 
                     input += srcStride;
@@ -119,8 +119,8 @@ static Waifu2x::eWaifu2xError process(const VSFrameRef * src, VSFrameRef * dst, 
                 waifu2xError = d->waifu2x->waifu2x(d->scale, d->buffer, dstp, srcWidth, srcHeight, 1, srcWidth * sizeof(float), 1, vsapi->getStride(dst, plane),
                                                    d->blockWidth, d->blockHeight, d->tta);
 
-                for (unsigned y = 0; y < dstHeight; y++) {
-                    for (unsigned x = 0; x < dstWidth; x++)
+                for (int y = 0; y < dstHeight; y++) {
+                    for (int x = 0; x < dstWidth; x++)
                         dstp[x] -= 0.5f;
 
                     dstp += dstStride;
@@ -151,16 +151,16 @@ static const VSFrameRef *VS_CC waifu2xGetFrame(int n, int activationReason, void
         const VSFrameRef * src = vsapi->getFrameFilter(n, d->node, frameCtx);
         VSFrameRef * dst = vsapi->newVideoFrame(d->vi.format, d->vi.width, d->vi.height, src, core);
 
-        const auto waifu2xError = process(src, dst, d, vsapi);
+        const auto waifu2xError = filter(src, dst, d, vsapi);
         if (waifu2xError != Waifu2x::eWaifu2xError_OK) {
-            const char * err;
+            const char * error = nullptr;
 
             if (waifu2xError == Waifu2x::eWaifu2xError_InvalidParameter)
-                err = "invalid parameter";
+                error = "invalid parameter";
             else if (waifu2xError == Waifu2x::eWaifu2xError_FailedProcessCaffe)
-                err = "failed process caffe";
+                error = "failed process caffe";
 
-            vsapi->setFilterError((std::string{ "Waifu2x-caffe: " } + err).c_str(), frameCtx);
+            vsapi->setFilterError((std::string{ "Waifu2x-caffe: " } + error).c_str(), frameCtx);
             vsapi->freeFrame(src);
             vsapi->freeFrame(dst);
             return nullptr;
@@ -189,8 +189,13 @@ static void VS_CC waifu2xFree(void *instanceData, VSCore *core, const VSAPI *vsa
 }
 
 static void VS_CC waifu2xCreate(const VSMap *in, VSMap *out, void *userData, VSCore *core, const VSAPI *vsapi) {
-    char * argv[] = { "" };
+    char * argv[] = { const_cast<char *>("") };
     Waifu2x::init_liblary(1, argv);
+
+    google::SetLogDestination(google::GLOG_INFO, "");
+    google::SetLogDestination(google::GLOG_WARNING, "");
+    google::SetLogDestination(google::GLOG_ERROR, "error_log_");
+    google::SetLogDestination(google::GLOG_FATAL, "error_log_");
 
     Waifu2xData d{};
     int err;
@@ -238,7 +243,7 @@ static void VS_CC waifu2xCreate(const VSMap *in, VSMap *out, void *userData, VSC
         }
 
         if (noise < -1 || noise > 3)
-            throw std::string{ "noise must be -1, 0, 1, 2 or 3" };
+            throw std::string{ "noise must be -1, 0, 1, 2, or 3" };
 
         if (d.scale < 1 || !isPowerOf2(d.scale))
             throw std::string{ "scale must be greater than or equal to 1 and be a power of 2" };
@@ -250,7 +255,7 @@ static void VS_CC waifu2xCreate(const VSMap *in, VSMap *out, void *userData, VSC
             throw std::string{ "block_h must be greater than or equal to 1" };
 
         if (model < 0 || model > 4)
-            throw std::string{ "model must be 0, 1, 2, 3 or 4" };
+            throw std::string{ "model must be 0, 1, 2, 3, or 4" };
 
         if (processor < 0)
             throw std::string{ "processor must be greater than or equal to 0" };
@@ -298,18 +303,18 @@ static void VS_CC waifu2xCreate(const VSMap *in, VSMap *out, void *userData, VSC
 
         const auto waifu2xError = d.waifu2x->Init(modelType, noise, modelPath, cudnn ? "cudnn" : "gpu", processor);
         if (waifu2xError != Waifu2x::eWaifu2xError_OK) {
-            const char * err;
+            const char * error = nullptr;
             if (waifu2xError == Waifu2x::eWaifu2xError_InvalidParameter)
-                err = "invalid parameter";
+                error = "invalid parameter";
             else if (waifu2xError == Waifu2x::eWaifu2xError_FailedOpenModelFile)
-                err = "failed open model file";
+                error = "failed open model file";
             else if (waifu2xError == Waifu2x::eWaifu2xError_FailedParseModelFile)
-                err = "failed parse model file";
+                error = "failed parse model file";
             else if (waifu2xError == Waifu2x::eWaifu2xError_FailedConstructModel)
-                err = "failed construct model";
+                error = "failed construct model";
             else if (waifu2xError == Waifu2x::eWaifu2xError_FailedCudaCheck)
-                err = "failed CUDA check";
-            throw std::string{ err } + " at initialization";
+                error = "failed CUDA check";
+            throw std::string{ error } + " at initialization";
         }
     } catch (const std::string & error) {
         vsapi->setError(out, ("Waifu2x-caffe: " + error).c_str());
