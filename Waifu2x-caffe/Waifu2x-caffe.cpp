@@ -35,7 +35,7 @@
 struct Waifu2xData {
     VSNodeRef * node;
     VSVideoInfo vi;
-    int scale, blockWidth, blockHeight;
+    int scale, blockWidth, blockHeight, batch;
     bool tta;
     float * srcInterleaved, * dstInterleaved, * buffer;
     Waifu2x * waifu2x;
@@ -72,7 +72,7 @@ static Waifu2x::eWaifu2xError filter(const VSFrameRef * src, VSFrameRef * dst, W
         }
 
         const auto waifu2xError = d->waifu2x->waifu2x(d->scale, d->srcInterleaved, d->dstInterleaved, width, height, 3, width * 3 * sizeof(float), 3, d->vi.width * 3 * sizeof(float),
-                                                      d->blockWidth, d->blockHeight, d->tta);
+                                                      d->blockWidth, d->blockHeight, d->tta, d->batch);
         if (waifu2xError != Waifu2x::eWaifu2xError_OK)
             return waifu2xError;
 
@@ -117,7 +117,7 @@ static Waifu2x::eWaifu2xError filter(const VSFrameRef * src, VSFrameRef * dst, W
                 }
 
                 waifu2xError = d->waifu2x->waifu2x(d->scale, d->buffer, dstp, srcWidth, srcHeight, 1, srcWidth * sizeof(float), 1, vsapi->getStride(dst, plane),
-                                                   d->blockWidth, d->blockHeight, d->tta);
+                                                   d->blockWidth, d->blockHeight, d->tta, d->batch);
 
                 for (int y = 0; y < dstHeight; y++) {
                     for (int x = 0; x < dstWidth; x++)
@@ -236,6 +236,10 @@ static void VS_CC waifu2xCreate(const VSMap *in, VSMap *out, void *userData, VSC
 
         d.tta = !!vsapi->propGetInt(in, "tta", 0, &err);
 
+        d.batch = int64ToIntS(vsapi->propGetInt(in, "batch", 0, &err));
+        if (err)
+            d.batch = 1;
+
         if (noise == -1 && d.scale == 1) {
             vsapi->propSetNode(out, "clip", d.node, paReplace);
             vsapi->freeNode(d.node);
@@ -259,6 +263,9 @@ static void VS_CC waifu2xCreate(const VSMap *in, VSMap *out, void *userData, VSC
 
         if (processor < 0)
             throw std::string{ "processor must be greater than or equal to 0" };
+
+        if (d.batch < 1)
+            throw std::string{ "batch must be greater than or equal to 1" };
 
         if (noise == 0 && model == 0)
             throw std::string{ "the anime_style_art model does not support noise reduction level 0" };
@@ -374,6 +381,7 @@ VS_EXTERNAL_API(void) VapourSynthPluginInit(VSConfigPlugin configFunc, VSRegiste
                  "model:int:opt;"
                  "cudnn:int:opt;"
                  "processor:int:opt;"
-                 "tta:int:opt;",
+                 "tta:int:opt;"
+                 "batch:int:opt;",
                  waifu2xCreate, nullptr, plugin);
 }
