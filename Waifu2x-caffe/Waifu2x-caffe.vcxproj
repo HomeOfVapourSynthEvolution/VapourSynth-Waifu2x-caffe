@@ -1,5 +1,5 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Release|x64">
       <Configuration>Release</Configuration>
@@ -9,16 +9,16 @@
   <PropertyGroup Label="Globals">
     <UseNativeEnvironment>true</UseNativeEnvironment>
     <VCProjectVersion>15.0</VCProjectVersion>
-    <ProjectGuid>{F33F21BF-A671-4106-82E1-0DFC3B6BD411}</ProjectGuid>
+    <ProjectGuid>{2AC1705A-2B5D-40D6-B332-80FF59A289BA}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>Waifu2xcaffe</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.17134.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>Intel C++ Compiler 18.0</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
@@ -32,26 +32,26 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>include;include\msgpack-c;C:\boost_1_65_1;C:\caffe\install\include;C:\caffe\install\gflags\include;C:\caffe\install\glog\include;C:\caffe\install\protobuf\include;C:\caffe\install\zlib\include;C:\opencv\install\include;$(CUDA_PATH)\include;C:\Program Files %28x86%29\IntelSWTools\compilers_and_libraries\windows\mkl\include;C:\Program Files %28x86%29\VapourSynth\sdk\include\vapoursynth;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\boost_1_65_1\lib64-msvc-14.1;C:\caffe\install\lib;C:\caffe\install\gflags\Lib;C:\caffe\install\glog\lib;C:\caffe\install\hdf5\lib;C:\caffe\install\protobuf\lib;C:\caffe\install\zlib\lib;C:\opencv\install\x64\vc15\staticlib;$(CUDA_PATH)\lib\x64;C:\Program Files (x86)\IntelSWTools\compilers_and_libraries\windows\mkl\lib\intel64;$(LibraryPath)</LibraryPath>
+    <IncludePath>include;include\msgpack-c;C:\boost_1_68_0;C:\caffe\install\include;C:\caffe\install\gflags\include;C:\caffe\install\glog\include;C:\caffe\install\OpenBLAS\include;C:\caffe\install\protobuf\include;C:\caffe\install\zlib\include;C:\opencv-3.4.3\install\include;$(CUDA_PATH)\include;C:\Program Files %28x86%29\VapourSynth\sdk\include\vapoursynth;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\boost_1_68_0\lib64-msvc-14.1;C:\caffe\install\lib;C:\opencv-3.4.3\install\x64\vc15\staticlib;$(CUDA_PATH)\lib\x64;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <PreprocessorDefinitions>BOOST_ALL_NO_LIB;GFLAGS_IS_A_DLL=0;GOOGLE_GLOG_DLL_DECL=;USE_CUDNN;USE_MKL;WIN32;NDEBUG;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>BOOST_ALL_NO_LIB;GOOGLE_GLOG_DLL_DECL=;NDEBUG;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <WarningLevel>Level3</WarningLevel>
+      <DiagnosticsFormat>Column</DiagnosticsFormat>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <Optimization>MaxSpeedHighLevel</Optimization>
+      <BufferSecurityCheck>false</BufferSecurityCheck>
       <FloatingPointModel>Fast</FloatingPointModel>
+      <ConformanceMode>true</ConformanceMode>
       <EnforceTypeConversionRules>true</EnforceTypeConversionRules>
-      <OpenMP>GenerateParallelCode</OpenMP>
-      <EnableAnsiAliasing>true</EnableAnsiAliasing>
       <DisableSpecificWarnings>4819;%(DisableSpecificWarnings)</DisableSpecificWarnings>
     </ClCompile>
     <Link>
-      <SubSystem>Windows</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>libboost_filesystem-vc141-mt-1_65_1.lib;libboost_iostreams-vc141-mt-1_65_1.lib;libboost_system-vc141-mt-1_65_1.lib;libboost_thread-vc141-mt-1_65_1.lib;caffe.lib;proto.lib;gflags_static.lib;glog.lib;libhdf5.lib;libhdf5_hl.lib;libprotobuf.lib;zlibstatic.lib;IlmImf.lib;ippicvmt.lib;ippiw.lib;ittnotify.lib;libjasper.lib;libjpeg.lib;libpng.lib;libtiff.lib;libwebp.lib;opencv_world331.lib;cublas.lib;cudart_static.lib;curand.lib;cudnn.lib;mkl_core.lib;mkl_intel_lp64.lib;mkl_intel_thread.lib;libmmds.lib;shlwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <SubSystem>Windows</SubSystem>
+      <AdditionalDependencies>libboost_filesystem-vc141-mt-x64-1_68.lib;libboost_iostreams-vc141-mt-x64-1_68.lib;libboost_system-vc141-mt-x64-1_68.lib;libboost_thread-vc141-mt-x64-1_68.lib;caffe.lib;caffeproto.lib;gflags_static.lib;glog.lib;libopenblas.dll.a;libprotobuf.lib;zlibstatic.lib;IlmImf.lib;libjasper.lib;libjpeg-turbo.lib;libpng.lib;libtiff.lib;libwebp.lib;opencv_core343.lib;opencv_imgcodecs343.lib;opencv_imgproc343.lib;cublas.lib;cudart_static.lib;cudnn.lib;curand.lib;shlwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>

@@ -7,7 +7,7 @@
     </Filter>
     <Filter Include="Header Files">
       <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
-      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;ipp;xsd</Extensions>
     </Filter>
     <Filter Include="Resource Files">
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
@@ -15,27 +15,27 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="waifu2x.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Waifu2x-caffe.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="cNet.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="stImage.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="waifu2x.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Waifu2x-caffe.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="waifu2x.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="cNet.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="stImage.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="waifu2x.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
