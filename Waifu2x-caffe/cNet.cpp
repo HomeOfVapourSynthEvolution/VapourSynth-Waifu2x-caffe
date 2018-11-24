@@ -190,14 +190,14 @@ Waifu2x::eWaifu2xError cNet::GetInfo(const boost::filesystem::path & info_path, 
 		const auto name = d["name"].GetString();
 		const auto arch_name = d["arch_name"].GetString();
 		const bool has_noise_scale = d.HasMember("has_noise_scale") && d["has_noise_scale"].GetBool() ? true : false;
+		const bool has_noise_only = d.HasMember("has_noise_only") && d["has_noise_only"].GetBool() ? true : false;
 		const int channels = d["channels"].GetInt();
-		const int recommended_crop_size = d.HasMember("recommended_crop_size") ? d["recommended_crop_size"].GetInt() : -1;
 
 		info.name = name;
 		info.arch_name = arch_name;
 		info.has_noise_scale = has_noise_scale;
+		info.has_noise_only = has_noise_only;
 		info.channels = channels;
-		info.recommended_crop_size = recommended_crop_size;
 
 		if (d.HasMember("offset"))
 		{
@@ -217,6 +217,14 @@ Waifu2x::eWaifu2xError cNet::GetInfo(const boost::filesystem::path & info_path, 
 			info.noise_scale.scale_factor = scale_factor;
 		}
 
+		if (d.HasMember("recommended_crop_size"))
+		{
+			const int recommended_crop_size = d["recommended_crop_size"].GetInt();
+			info.noise.recommended_crop_size = recommended_crop_size;
+			info.scale.recommended_crop_size = recommended_crop_size;
+			info.noise_scale.recommended_crop_size = recommended_crop_size;
+		}
+
 		if (d.HasMember("offset_noise"))
 		{
 			const int offset = d["offset_noise"].GetInt();
@@ -227,6 +235,12 @@ Waifu2x::eWaifu2xError cNet::GetInfo(const boost::filesystem::path & info_path, 
 		{
 			const int scale_factor = d["scale_factor_noise"].GetInt();
 			info.noise.scale_factor = scale_factor;
+		}
+
+		if (d.HasMember("recommended_crop_size_noise"))
+		{
+			const int recommended_crop_size = d["recommended_crop_size_noise"].GetInt();
+			info.noise.recommended_crop_size = recommended_crop_size;
 		}
 
 		if (d.HasMember("offset_scale"))
@@ -241,6 +255,12 @@ Waifu2x::eWaifu2xError cNet::GetInfo(const boost::filesystem::path & info_path, 
 			info.scale.scale_factor = scale_factor;
 		}
 
+		if (d.HasMember("recommended_crop_size_scale"))
+		{
+			const int recommended_crop_size = d["recommended_crop_size_scale"].GetInt();
+			info.scale.recommended_crop_size = recommended_crop_size;
+		}
+
 		if (d.HasMember("offset_noise_scale"))
 		{
 			const int offset = d["offset_noise_scale"].GetInt();
@@ -251,6 +271,12 @@ Waifu2x::eWaifu2xError cNet::GetInfo(const boost::filesystem::path & info_path, 
 		{
 			const int scale_factor = d["scale_factor_noise_scale"].GetInt();
 			info.noise_scale.scale_factor = scale_factor;
+		}
+
+		if (d.HasMember("recommended_crop_size_noise_scale"))
+		{
+			const int recommended_crop_size = d["recommended_crop_size_noise_scale"].GetInt();
+			info.noise_scale.recommended_crop_size = recommended_crop_size;
 		}
 	}
 	catch (...)
@@ -456,9 +482,6 @@ Waifu2x::eWaifu2xError cNet::LoadParameterFromJson(const boost::filesystem::path
 		return Waifu2x::eWaifu2xError_FailedParseModelFile;
 	}
 
-	if (d.Size() != 7)
-		return Waifu2x::eWaifu2xError_FailedParseModelFile;
-
 	int inputPlane = 0;
 	int outputPlane = 0;
 	try
@@ -476,9 +499,6 @@ Waifu2x::eWaifu2xError cNet::LoadParameterFromJson(const boost::filesystem::path
 
 	if (inputPlane != outputPlane)
 		return Waifu2x::eWaifu2xError_FailedParseModelFile;
-
-	//if (param.layer_size() < 17)
-	//	return Waifu2x::eWaifu2xError_FailedParseModelFile;
 
 	std::vector<boost::shared_ptr<caffe::Layer<float>>> list;
 	auto &v = mNet->layers();

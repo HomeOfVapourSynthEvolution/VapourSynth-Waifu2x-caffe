@@ -11,7 +11,8 @@
 #include <opencv2/core.hpp>
 
 #define CUDNN_DLL_NAME "cudnn64_7.dll"
-#define CUDNN_REQUIRE_VERION_TEXT "v7"
+#define CUDNN_REQUIRE_VERION_TEXT "v7.3"
+#define CUDNN_REQUIRE_VERION 7300
 
 
 namespace caffe
@@ -65,13 +66,16 @@ public:
 		{
 			int scale_factor;
 			int offset;
+			int recommended_crop_size;
+
+			stParam() : scale_factor(1), offset(0), recommended_crop_size(-1) {}
 		};
 
 		std::string name;
 		std::string arch_name;
 		bool has_noise_scale;
+		bool has_noise_only;
 		int channels;
-		int recommended_crop_size;
 
 		stParam noise;
 		stParam scale;
@@ -138,7 +142,7 @@ private:
 
 	int mInputPlane; // ネットへの入力チャンネル数
 	int mMaxNetOffset; // ネットに入力するとどれくらい削れるか
-	bool mHasNoiseScale;
+	bool mHasNoiseScaleOnly;
 
 	float *mOutputBlock;
 	size_t mOutputBlockSize;

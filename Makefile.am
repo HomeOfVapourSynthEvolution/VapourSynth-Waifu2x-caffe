@@ -15,5 +15,5 @@ libwaifu2x_caffe_la_SOURCES = Waifu2x-caffe/cNet.cpp \
                               Waifu2x-caffe/Waifu2x-caffe.cpp
 
 LIBRARY_DIRS = -L/usr/local/lib -L/usr/lib -L/usr/local/cuda/lib64 -L/opt/cuda/lib64 -L/opt/OpenBLAS/lib
-LIBS = -lboost_filesystem -lboost_iostreams -lboost_system -lboost_thread -lcaffe -lgflags -lglog -lopenblas -lprotobuf -lz -lopencv_core -lopencv_imgcodecs -lopencv_imgproc -lcublas -lcudart -lcudnn -lcurand -lgfortran -lm
+LIBS = -lcaffe -lcudart -lcublas -lcurand -lcudnn -lopenblas -lboost_filesystem -lboost_iostreams -lboost_thread -lboost_system -lprotobuf -lglog -lgflags -lopencv_imgcodecs -lopencv_imgproc -lopencv_core -lz -lgfortran -lm
 libwaifu2x_caffe_la_LDFLAGS = -no-undefined -avoid-version -pthread $(LIBRARY_DIRS) $(LIBS) $(PLUGINLDFLAGS)
