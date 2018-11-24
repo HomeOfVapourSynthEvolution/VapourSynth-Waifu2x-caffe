@@ -1,5 +1,5 @@
 /*
-  The MIT License (MIT)
+  MIT License
 
   Copyright (c) 2016-2018 HolyWu
 
@@ -226,7 +226,7 @@ static void VS_CC waifu2xCreate(const VSMap *in, VSMap *out, void *userData, VSC
 
         int model = int64ToIntS(vsapi->propGetInt(in, "model", 0, &err));
         if (err)
-            model = 3;
+            model = 6;
 
         bool cudnn = !!vsapi->propGetInt(in, "cudnn", 0, &err);
         if (err)
@@ -258,8 +258,8 @@ static void VS_CC waifu2xCreate(const VSMap *in, VSMap *out, void *userData, VSC
         if (d.blockHeight < 1)
             throw std::string{ "block_h must be greater than or equal to 1" };
 
-        if (model < 0 || model > 5)
-            throw std::string{ "model must be 0, 1, 2, 3, 4, or 5" };
+        if (model < 0 || model > 6)
+            throw std::string{ "model must be 0, 1, 2, 3, 4, 5, or 6" };
 
         if (processor < 0)
             throw std::string{ "processor must be greater than or equal to 0" };
@@ -268,11 +268,11 @@ static void VS_CC waifu2xCreate(const VSMap *in, VSMap *out, void *userData, VSC
             throw std::string{ "batch must be greater than or equal to 1" };
 
         if (noise == 0 && model == 0)
-            throw std::string{ "the anime_style_art model does not support noise reduction level 0" };
+            throw std::string{ "anime_style_art model does not support noise reduction level 0" };
 
         fmtcPlugin = vsapi->getPluginById("fmtconv", core);
         if (d.scale != 1 && d.vi.format->subSamplingW && !fmtcPlugin)
-            throw std::string{ "the fmtconv plugin is required for correcting the horizontal chroma shift" };
+            throw std::string{ "fmtconv plugin is required for correcting the horizontal chroma shift" };
 
         if (d.scale != 1) {
             d.vi.width *= d.scale;
@@ -305,8 +305,10 @@ static void VS_CC waifu2xCreate(const VSMap *in, VSMap *out, void *userData, VSC
             modelPath += "/models/upconv_7_anime_style_art_rgb";
         else if (model == 4)
             modelPath += "/models/upconv_7_photo";
-        else
+        else if (model == 5)
             modelPath += "/models/upresnet10";
+        else
+            modelPath += "/models/cunet";
 
         d.waifu2x = new Waifu2x{};
 
