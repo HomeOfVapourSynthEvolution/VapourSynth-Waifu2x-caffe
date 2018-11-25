@@ -1,5 +1,5 @@
 INCLUDE_DIRS = -I/usr/local/include -I/usr/include -I/usr/local/cuda/include -I/opt/cuda/include -I/usr/local/include/openblas -I/usr/include/openblas -I/opt/OpenBLAS/include -I$(srcdir)/Waifu2x-caffe/include -I$(srcdir)/Waifu2x-caffe/include/msgpack-c
-common_cflags = -O3 -ffast-math -pthread $(INCLUDE_DIRS) $(MFLAGS)
+common_cflags = -O3 -ffast-math -pthread -fvisibility=hidden $(INCLUDE_DIRS) $(MFLAGS)
 AM_CXXFLAGS = -std=c++11 $(common_cflags)
 
 AM_CPPFLAGS = $(VapourSynth_CFLAGS)
