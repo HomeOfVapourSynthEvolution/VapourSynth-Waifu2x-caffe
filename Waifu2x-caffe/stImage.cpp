@@ -744,10 +744,6 @@ void stImage::DeconvertFromNetFormat(const int input_plane)
 
 void stImage::ShrinkImage(const Factor scale)
 {
-	// TODO: scale = 1.0 でも悪影響を及ぼさないか調べる
-
-	const int scaleBase = 2; // TODO: モデルの拡大率によって可変できるようにする
-
 	const auto Width = scale.MultiNumerator(mOrgSize.width);
 	const auto Height = scale.MultiNumerator(mOrgSize.height);
 
@@ -765,12 +761,15 @@ void stImage::ShrinkImage(const Factor scale)
 
 void stImage::ShrinkImage(const int width, const int height)
 {
-	// TODO: scale = 1.0 でも悪影響を及ぼさないか調べる
-
 	const cv::Size_<int> ns(width, height);
 	if (mEndImage.size().width != ns.width || mEndImage.size().height != ns.height)
 	{
+		const auto scale_width = (float)mEndImage.size().width / (float)ns.width;
+		const auto scale_height = (float)mEndImage.size().height / (float)ns.height;
+
 		int argo = cv::INTER_CUBIC;
+		if (scale_width < 0.5 || scale_height < 0.5)
+			argo = cv::INTER_AREA;
 
 		cv::resize(mEndImage, mEndImage, ns, 0.0, 0.0, argo);
 	}
