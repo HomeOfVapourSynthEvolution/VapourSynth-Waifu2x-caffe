@@ -12,7 +12,7 @@
     <ProjectGuid>{2AC1705A-2B5D-40D6-B332-80FF59A289BA}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>Waifu2xcaffe</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.17134.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">

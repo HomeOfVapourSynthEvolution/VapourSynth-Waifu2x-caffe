@@ -38,8 +38,8 @@ Usage
   * 2 = photo (for photo and anime)
   * 3 = upconv_7_anime_style_art_rgb (has faster speed than `anime_style_art_rgb`, with equal or better quality)
   * 4 = upconv_7_photo (has faster speed than `photo`, with equal or better quality)
-  * 5 = upresnet10 (has better quality than `upconv_7_anime_style_art_rgb`). Note that the result will change if the block size is different. The recommended block size is 38 for this model. Use a larger `batch` size to compensate the slowness due to small block size.
-  * 6 = cunet (has the best quality for 2D illustration among the bundled models). Note that the result will change if the block size is different.
+  * 5 = upresnet10 (has better quality than `upconv_7_anime_style_art_rgb`). Note that the result will change if the block size is different. The recommended block size of upresnet10 is 38. Use a larger `batch` size to compensate the slowness due to small block size.
+  * 6 = cunet (has the best quality for 2D illustration among the bundled models). Note that the result will change if the block size is different. The block size of cunet must be divisible by 4.
 
 * cudnn: When set to true, it uses cuDNN for processing. When set to false, CUDA will be used instead.
 

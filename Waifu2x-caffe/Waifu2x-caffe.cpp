@@ -261,14 +261,17 @@ static void VS_CC waifu2xCreate(const VSMap *in, VSMap *out, void *userData, VSC
         if (model < 0 || model > 6)
             throw std::string{ "model must be 0, 1, 2, 3, 4, 5, or 6" };
 
+        if (model == 0 && noise == 0)
+            throw std::string{ "anime_style_art model does not support noise reduction level 0" };
+
+        if (model == 6 && ((d.blockWidth & 3) || (d.blockHeight & 3)))
+            throw std::string{ "block size of cunet model must be divisible by 4" };
+
         if (processor < 0)
             throw std::string{ "processor must be greater than or equal to 0" };
 
         if (d.batch < 1)
             throw std::string{ "batch must be greater than or equal to 1" };
-
-        if (noise == 0 && model == 0)
-            throw std::string{ "anime_style_art model does not support noise reduction level 0" };
 
         fmtcPlugin = vsapi->getPluginById("fmtconv", core);
         if (d.scale != 1 && d.vi.format->subSamplingW && !fmtcPlugin)
