@@ -33,13 +33,13 @@ Usage
 * block_h: The same as `block_w` but for vertical.
 
 * model: Sets which model to use. Only `anime_style_art` is Y model (luma only), the others are RGB models.
-  * 0 = anime_style_art (for 2D illustration)
-  * 1 = anime_style_art_rgb (for 2D illustration)
+  * 0 = anime_style_art (for 2D artwork)
+  * 1 = anime_style_art_rgb (for 2D artwork)
   * 2 = photo (for photo and anime)
   * 3 = upconv_7_anime_style_art_rgb (has faster speed than `anime_style_art_rgb`, with equal or better quality)
   * 4 = upconv_7_photo (has faster speed than `photo`, with equal or better quality)
   * 5 = upresnet10 (has better quality than `upconv_7_anime_style_art_rgb`). Note that the result will change if the block size is different. The recommended block size of upresnet10 is 38. Use a larger `batch` size to compensate the slowness due to small block size.
-  * 6 = cunet (has the best quality for 2D illustration among the bundled models). Note that the result will change if the block size is different. The block size of cunet must be divisible by 4.
+  * 6 = cunet (has the best quality for 2D artwork among the bundled models). Note that the result will change if the block size is different. The block size of cunet must be divisible by 4.
 
 * cudnn: When set to true, it uses cuDNN for processing. When set to false, CUDA will be used instead.
 
@@ -53,10 +53,10 @@ Usage
 Compilation
 ===========
 
-Requires [customized Caffe library](https://github.com/HolyWu/caffe). To build `Caffe`, you must have all the dependencies: `CUDA Toolkit 10`, `cuDNN 7`, `OpenBLAS`, `Boost`, `protobuf`, `glog`, and `gflags`. Additionally, `waifu2x-caffe` library requires `OpenCV 3`. The defaults in `Makefile.config` should work, but modify the relevant lines if it doesn't (`CUDA_DIR` especially). Then just type `make all -j4` to compile `Caffe`.
+Requires [customized Caffe library](https://github.com/HolyWu/caffe). To build `Caffe`, you must have all the dependencies: `CUDA Toolkit 10`, `cuDNN 7`, `OpenBLAS`, `Boost`, `protobuf`, `glog`, and `gflags`. Additionally, `waifu2x-caffe` library requires `OpenCV 3`. The defaults in `Makefile.config` should work, but adjust the relevant lines if not (such as `CUDA_DIR`). Then just type `make all -j4` to compile `Caffe`.
 
+There are options `cuda_includedir` and `cuda_libdir` settable in Meson. The defaults are `/usr/local/cuda/include` and `/usr/local/cuda/lib64` respectively.
 ```
-./autogen.sh
-./configure
-make
+meson build
+ninja -C build
 ```

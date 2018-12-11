@@ -1,0 +1,11 @@
+option('cuda_includedir',
+  type : 'string',
+  value : '/usr/local/cuda/include',
+  description : 'Header directory of CUDA'
+)
+
+option('cuda_libdir',
+  type : 'string',
+  value : '/usr/local/cuda/lib64',
+  description : 'Library directory of CUDA'
+)
