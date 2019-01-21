@@ -1,7 +1,7 @@
 project('Waifu2x-caffe', 'cpp',
   default_options : ['buildtype=release', 'b_ndebug=if-release', 'cpp_std=c++14'],
   meson_version : '>=0.48.0',
-  version : '12'
+  version : '13'
 )
 
 add_project_arguments('-ffast-math', language : 'cpp')
@@ -22,7 +22,7 @@ vapoursynth_dep = dependency('vapoursynth').partial_dependency(compile_args : tr
 
 deps = [vapoursynth_dep]
 
-deps += cc.find_library('caffe')
+deps += cc.find_library('caffe', dirs : get_option('caffe_libdir'))
 
 cuda_libdir = get_option('cuda_libdir')
 deps += cc.find_library('cudart', dirs : cuda_libdir)
@@ -48,7 +48,12 @@ deps += dependency('zlib')
 
 deps += dependency('threads')
 
-includes = [include_directories(get_option('cuda_includedir')), include_directories('Waifu2x-caffe/include'), include_directories('Waifu2x-caffe/include/msgpack-c')]
+includes = [
+  include_directories(get_option('caffe_includedir')),
+  include_directories(get_option('cuda_includedir')),
+  include_directories('Waifu2x-caffe/include'),
+  include_directories('Waifu2x-caffe/include/msgpack-c')
+]
 
 if host_machine.cpu_family().startswith('x86')
   add_project_arguments('-mfpmath=sse', '-msse2', language : 'cpp')

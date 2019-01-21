@@ -55,7 +55,7 @@ Compilation
 
 Requires [customized Caffe library](https://github.com/HolyWu/caffe). To build `Caffe`, you must have all the dependencies: `CUDA Toolkit 10`, `cuDNN 7`, `OpenBLAS`, `Boost`, `protobuf`, `glog`, and `gflags`. Additionally, `waifu2x-caffe` library requires `OpenCV 3`. The defaults in `Makefile.config` should work, but adjust the relevant lines if not (such as `CUDA_DIR`). Then just type `make all -j4` to compile `Caffe`.
 
-There are options `cuda_includedir` and `cuda_libdir` settable in Meson. The defaults are `/usr/local/cuda/include` and `/usr/local/cuda/lib64` respectively.
+There are options `caffe_includedir`, `caffe_libdir`, `cuda_includedir`, and `cuda_libdir` settable in Meson.
 ```
 meson build
 ninja -C build

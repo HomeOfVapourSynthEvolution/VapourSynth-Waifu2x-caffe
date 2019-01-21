@@ -1,3 +1,15 @@
+option('caffe_includedir',
+  type : 'string',
+  value : '/usr/local/caffe/include',
+  description : 'Header directory of Caffe'
+)
+
+option('caffe_libdir',
+  type : 'string',
+  value : '/usr/local/caffe/lib',
+  description : 'Library directory of Caffe'
+)
+
 option('cuda_includedir',
   type : 'string',
   value : '/usr/local/cuda/include',
