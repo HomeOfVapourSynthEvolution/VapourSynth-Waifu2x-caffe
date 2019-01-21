@@ -649,8 +649,11 @@ Waifu2x::eWaifu2xError Waifu2x::Init(const eWaifu2xModelType mode, const int noi
 		if (ret != Waifu2x::eWaifu2xError_OK)
 			return ret;
 
-		mHasNoiseScaleOnly = info.has_noise_scale && !info.has_noise_only;
+		mHasNoiseScaleOnly = info.has_noise_scale;
 		mInputPlane = info.channels;
+
+		if (mode == eWaifu2xModelTypeNoise && info.has_noise_only) // ノイズ除去だけかつノイズ除去モデルが存在するのであればノイズ除去スケールモデルは使わないようにする
+			mHasNoiseScaleOnly = false;
 
 		if (mode == eWaifu2xModelTypeNoise || mode == eWaifu2xModelTypeNoiseScale || mode == eWaifu2xModelTypeAutoScale)
 		{
@@ -681,8 +684,8 @@ Waifu2x::eWaifu2xError Waifu2x::Init(const eWaifu2xModelType mode, const int noi
 			mMaxNetOffset = mNoiseNet->GetNetOffset();
 		}
 
-		// noise_scaleを持っている場合はαチャンネルの拡大のためにmScaleNetも構築する必要がある
-		if (info.has_noise_scale || mode == eWaifu2xModelTypeScale || mode == eWaifu2xModelTypeNoiseScale || mode == eWaifu2xModelTypeAutoScale)
+		// 拡大が必要な場合はαチャンネルの拡大のためにmScaleNetも構築する必要がある
+		if (mode == eWaifu2xModelTypeScale || mode == eWaifu2xModelTypeNoiseScale || mode == eWaifu2xModelTypeAutoScale)
 		{
 			const std::string base_name = "scale2.0x_model";
 
