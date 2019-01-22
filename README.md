@@ -59,4 +59,5 @@ There are options `caffe_includedir`, `caffe_libdir`, `cuda_includedir`, and `cu
 ```
 meson build
 ninja -C build
+ninja -C build install
 ```
