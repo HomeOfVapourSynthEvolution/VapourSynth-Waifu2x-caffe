@@ -10,13 +10,13 @@ option('caffe_libdir',
   description : 'Library directory of Caffe'
 )
 
-option('cuda_includedir',
+option('cudaincludedir',
   type : 'string',
   value : '/usr/local/cuda/include',
   description : 'Header directory of CUDA'
 )
 
-option('cuda_libdir',
+option('cudalibdir',
   type : 'string',
   value : '/usr/local/cuda/lib64',
   description : 'Library directory of CUDA'

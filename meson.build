@@ -24,7 +24,7 @@ deps = [vapoursynth_dep]
 
 deps += cc.find_library('caffe', dirs : get_option('caffe_libdir'))
 
-cuda_libdir = get_option('cuda_libdir')
+cuda_libdir = get_option('cudalibdir')
 deps += cc.find_library('cudart', dirs : cuda_libdir)
 deps += cc.find_library('cublas', dirs : cuda_libdir)
 deps += cc.find_library('curand', dirs : cuda_libdir)
@@ -50,7 +50,7 @@ deps += dependency('threads')
 
 includes = [
   include_directories(get_option('caffe_includedir')),
-  include_directories(get_option('cuda_includedir')),
+  include_directories(get_option('cudaincludedir')),
   include_directories('Waifu2x-caffe/include'),
   include_directories('Waifu2x-caffe/include/msgpack-c')
 ]
