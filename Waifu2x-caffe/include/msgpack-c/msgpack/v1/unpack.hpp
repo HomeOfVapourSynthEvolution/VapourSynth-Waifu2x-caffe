@@ -78,19 +78,19 @@ inline void unpack_uint64(uint64_t d, msgpack::object& o)
 { o.type = msgpack::type::POSITIVE_INTEGER; o.via.u64 = d; }
 
 inline void unpack_int8(int8_t d, msgpack::object& o)
-{ if(d >= 0) { o.type = msgpack::type::POSITIVE_INTEGER; o.via.u64 = d; }
+{ if(d >= 0) { o.type = msgpack::type::POSITIVE_INTEGER; o.via.u64 = static_cast<uint64_t>(d); }
         else { o.type = msgpack::type::NEGATIVE_INTEGER; o.via.i64 = d; } }
 
 inline void unpack_int16(int16_t d, msgpack::object& o)
-{ if(d >= 0) { o.type = msgpack::type::POSITIVE_INTEGER; o.via.u64 = d; }
+{ if(d >= 0) { o.type = msgpack::type::POSITIVE_INTEGER; o.via.u64 = static_cast<uint64_t>(d); }
         else { o.type = msgpack::type::NEGATIVE_INTEGER; o.via.i64 = d; } }
 
 inline void unpack_int32(int32_t d, msgpack::object& o)
-{ if(d >= 0) { o.type = msgpack::type::POSITIVE_INTEGER; o.via.u64 = d; }
+{ if(d >= 0) { o.type = msgpack::type::POSITIVE_INTEGER; o.via.u64 = static_cast<uint64_t>(d); }
         else { o.type = msgpack::type::NEGATIVE_INTEGER; o.via.i64 = d; } }
 
 inline void unpack_int64(int64_t d, msgpack::object& o)
-{ if(d >= 0) { o.type = msgpack::type::POSITIVE_INTEGER; o.via.u64 = d; }
+{ if(d >= 0) { o.type = msgpack::type::POSITIVE_INTEGER; o.via.u64 = static_cast<uint64_t>(d); }
         else { o.type = msgpack::type::NEGATIVE_INTEGER; o.via.i64 = d; } }
 
 inline void unpack_float(float d, msgpack::object& o)
@@ -113,10 +113,13 @@ struct unpack_array {
         if (n > u.limit().array()) throw msgpack::array_size_overflow("array size overflow");
         o.type = msgpack::type::ARRAY;
         o.via.array.size = 0;
-        size_t size = n*sizeof(msgpack::object);
-        if (size / sizeof(msgpack::object) != n) {
+
+#if SIZE_MAX == UINT_MAX
+        if (n > SIZE_MAX/sizeof(msgpack::object))
             throw msgpack::array_size_overflow("array size overflow");
-        }
+#endif // SIZE_MAX == UINT_MAX
+
+        size_t size = n*sizeof(msgpack::object);
         o.via.array.ptr = static_cast<msgpack::object*>(u.zone().allocate_align(size, MSGPACK_ZONE_ALIGNOF(msgpack::object)));
     }
 };
@@ -125,6 +128,7 @@ inline void unpack_array_item(msgpack::object& c, msgpack::object const& o)
 {
 #if defined(__GNUC__) && !defined(__clang__)
     std::memcpy(&c.via.array.ptr[c.via.array.size++], &o, sizeof(msgpack::object));
+
 #else  /* __GNUC__ && !__clang__ */
     c.via.array.ptr[c.via.array.size++] = o;
 #endif /* __GNUC__ && !__clang__ */
@@ -135,10 +139,13 @@ struct unpack_map {
         if (n > u.limit().map()) throw msgpack::map_size_overflow("map size overflow");
         o.type = msgpack::type::MAP;
         o.via.map.size = 0;
-        size_t size = n*sizeof(msgpack::object_kv);
-        if (size / sizeof(msgpack::object_kv) != n) {
+
+#if SIZE_MAX == UINT_MAX
+        if (n > SIZE_MAX/sizeof(msgpack::object_kv))
             throw msgpack::map_size_overflow("map size overflow");
-        }
+#endif // SIZE_MAX == UINT_MAX
+
+        size_t size = n*sizeof(msgpack::object_kv);
         o.via.map.ptr = static_cast<msgpack::object_kv*>(u.zone().allocate_align(size, MSGPACK_ZONE_ALIGNOF(msgpack::object_kv)));
     }
 };
@@ -418,10 +425,10 @@ private:
             m_stack[0].set_obj(obj);
             ++m_current;
             /*printf("-- finish --\n"); */
-            off = m_current - m_start;
+            off = static_cast<std::size_t>(m_current - m_start);
         }
         else if (ret < 0) {
-            off = m_current - m_start;
+            off = static_cast<std::size_t>(m_current - m_start);
         }
         else {
             m_cs = MSGPACK_CS_HEADER;
@@ -461,7 +468,7 @@ inline int context::execute(const char* data, std::size_t len, std::size_t& off)
     msgpack::object obj;
 
     if(m_current == pe) {
-        off = m_current - m_start;
+        off = static_cast<std::size_t>(m_current - m_start);
         return 0;
     }
     bool fixed_trail_again = false;
@@ -544,7 +551,7 @@ inline int context::execute(const char* data, std::size_t len, std::size_t& off)
                 int ret = push_proc(obj, off);
                 if (ret != 0) return ret;
             } else {
-                off = m_current - m_start;
+                off = static_cast<std::size_t>(m_current - m_start);
                 return -1;
             }
             // end MSGPACK_CS_HEADER
@@ -555,7 +562,7 @@ inline int context::execute(const char* data, std::size_t len, std::size_t& off)
                 fixed_trail_again = false;
             }
             if(static_cast<std::size_t>(pe - m_current) < m_trail) {
-                off = m_current - m_start;
+                off = static_cast<std::size_t>(m_current - m_start);
                 return 0;
             }
             n = m_current;
@@ -830,13 +837,13 @@ inline int context::execute(const char* data, std::size_t len, std::size_t& off)
                 if (ret != 0) return ret;
             } break;
             default:
-                off = m_current - m_start;
+                off = static_cast<std::size_t>(m_current - m_start);
                 return -1;
             }
         }
     } while(m_current != pe);
 
-    off = m_current - m_start;
+    off = static_cast<std::size_t>(m_current - m_start);
     return 0;
 }
 
