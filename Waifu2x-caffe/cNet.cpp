@@ -119,7 +119,7 @@ static Waifu2x::eWaifu2xError readProtoBinary(const boost::filesystem::path &pat
 	google::protobuf::io::ArrayInputStream input(tmp.data(), tmp.size());
 
 	google::protobuf::io::CodedInputStream coded_input(&input);
-	coded_input.SetTotalBytesLimit(kProtoReadBytesLimit, 536870912);
+	coded_input.SetTotalBytesLimit(kProtoReadBytesLimit);
 
 	const bool success = proto->ParseFromCodedStream(&coded_input);
 	if (!success)
