@@ -11,10 +11,10 @@
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include <stb_image_write.h>
 
-const int YToRGBConvertMode = CV_GRAY2RGB;
-const int YToRGBConverInversetMode = CV_RGB2GRAY;
-const int BGRToYConvertMode = CV_BGR2YUV;
-const int BGRToConvertInverseMode = CV_YUV2BGR;
+const int YToRGBConvertMode = cv::COLOR_GRAY2RGB;
+const int YToRGBConverInversetMode = cv::COLOR_RGB2GRAY;
+const int BGRToYConvertMode = cv::COLOR_BGR2YUV;
+const int BGRToConvertInverseMode = cv::COLOR_YUV2BGR;
 
 // floatな画像をuint8_tな画像に変換する際の四捨五入に使う値
 // https://github.com/nagadomi/waifu2x/commit/797b45ae23665a1c5e3c481c018e48e6f0d0e383
@@ -504,7 +504,7 @@ void stImage::ConvertToNetFormat(const int input_plane, const int alpha_offset)
 					AlphaMakeBorder(planes, mTmpImageA, alpha_offset); // 透明なピクセルと不透明なピクセルの境界部分の色を広げる
 
 					// α拡大用にRGBに変換
-					cv::cvtColor(mTmpImageA, mTmpImageA, CV_GRAY2RGB);
+					cv::cvtColor(mTmpImageA, mTmpImageA, cv::COLOR_GRAY2RGB);
 				}
 				else
 				{
@@ -718,7 +718,7 @@ void stImage::DeconvertFromNetFormat(const int input_plane)
 			if (!mTmpImageA.empty()) // Aもあるので合体
 			{
 				// RGBから1chに戻す
-				cv::cvtColor(mTmpImageA, mTmpImageA, CV_RGB2GRAY);
+				cv::cvtColor(mTmpImageA, mTmpImageA, cv::COLOR_RGB2GRAY);
 
 				planes.push_back(mTmpImageA);
 				mTmpImageA.release();

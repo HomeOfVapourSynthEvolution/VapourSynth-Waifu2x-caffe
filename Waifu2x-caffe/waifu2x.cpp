@@ -796,13 +796,13 @@ Waifu2x::eWaifu2xError Waifu2x::waifu2x(const double factor, const void* source,
 
 	int cvrSetting = -1;
 	if (in_channel == 3 && out_channel == 3)
-		cvrSetting = CV_BGR2RGB;
+		cvrSetting = cv::COLOR_BGR2RGB;
 	else if (in_channel == 4 && out_channel == 4)
-		cvrSetting = CV_BGRA2RGBA;
+		cvrSetting = cv::COLOR_BGRA2RGBA;
 	else if (in_channel == 3 && out_channel == 4)
-		cvrSetting = CV_BGR2RGBA;
+		cvrSetting = cv::COLOR_BGR2RGBA;
 	else if (in_channel == 4 && out_channel == 3)
-		cvrSetting = CV_BGRA2RGB;
+		cvrSetting = cv::COLOR_BGRA2RGB;
 	else if (!(in_channel == 1 && out_channel == 1))
 		return Waifu2x::eWaifu2xError_InvalidParameter;
 

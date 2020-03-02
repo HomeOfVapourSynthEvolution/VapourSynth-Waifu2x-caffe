@@ -40,9 +40,7 @@ deps += dependency('libglog')
 
 deps += dependency('gflags')
 
-deps += cc.find_library('opencv_imgcodecs')
-deps += cc.find_library('opencv_imgproc')
-deps += cc.find_library('opencv_core')
+deps += dependency('opencv4')
 
 deps += dependency('zlib')
 
