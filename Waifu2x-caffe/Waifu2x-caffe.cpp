@@ -135,12 +135,12 @@ static Waifu2x::eWaifu2xError filter(const VSFrameRef * src, VSFrameRef * dst, W
     return Waifu2x::eWaifu2xError_OK;
 }
 
-static void VS_CC waifu2xInit(VSMap *in, VSMap *out, void **instanceData, VSNode *node, VSCore *core, const VSAPI *vsapi) {
+static void VS_CC waifu2xInit(VSMap * in, VSMap * out, void ** instanceData, VSNode * node, VSCore * core, const VSAPI * vsapi) {
     Waifu2xData * d = static_cast<Waifu2xData *>(*instanceData);
     vsapi->setVideoInfo(&d->vi, 1, node);
 }
 
-static const VSFrameRef *VS_CC waifu2xGetFrame(int n, int activationReason, void **instanceData, void **frameData, VSFrameContext *frameCtx, VSCore *core, const VSAPI *vsapi) {
+static const VSFrameRef * VS_CC waifu2xGetFrame(int n, int activationReason, void ** instanceData, void ** frameData, VSFrameContext * frameCtx, VSCore * core, const VSAPI * vsapi) {
     Waifu2xData * d = static_cast<Waifu2xData *>(*instanceData);
 
     if (activationReason == arInitial) {
@@ -153,12 +153,14 @@ static const VSFrameRef *VS_CC waifu2xGetFrame(int n, int activationReason, void
 
         const auto waifu2xError = filter(src, dst, d, vsapi);
         if (waifu2xError != Waifu2x::eWaifu2xError_OK) {
-            const char * error = nullptr;
+            const char * error;
 
             if (waifu2xError == Waifu2x::eWaifu2xError_InvalidParameter)
                 error = "invalid parameter";
             else if (waifu2xError == Waifu2x::eWaifu2xError_FailedProcessCaffe)
                 error = "failed process caffe";
+            else
+                error = "unknown error";
 
             vsapi->setFilterError((std::string{ "Waifu2x-caffe: " } + error).c_str(), frameCtx);
             vsapi->freeFrame(src);
@@ -173,7 +175,7 @@ static const VSFrameRef *VS_CC waifu2xGetFrame(int n, int activationReason, void
     return nullptr;
 }
 
-static void VS_CC waifu2xFree(void *instanceData, VSCore *core, const VSAPI *vsapi) {
+static void VS_CC waifu2xFree(void * instanceData, VSCore * core, const VSAPI * vsapi) {
     Waifu2xData * d = static_cast<Waifu2xData *>(instanceData);
 
     vsapi->freeNode(d->node);
@@ -188,7 +190,7 @@ static void VS_CC waifu2xFree(void *instanceData, VSCore *core, const VSAPI *vsa
     delete d;
 }
 
-static void VS_CC waifu2xCreate(const VSMap *in, VSMap *out, void *userData, VSCore *core, const VSAPI *vsapi) {
+static void VS_CC waifu2xCreate(const VSMap * in, VSMap * out, void * userData, VSCore * core, const VSAPI * vsapi) {
     char * argv[] = { const_cast<char *>("") };
     Waifu2x::init_liblary(1, argv);
 
@@ -317,7 +319,8 @@ static void VS_CC waifu2xCreate(const VSMap *in, VSMap *out, void *userData, VSC
 
         const auto waifu2xError = d.waifu2x->Init(modelType, noise, modelPath, cudnn ? "cudnn" : "gpu", processor);
         if (waifu2xError != Waifu2x::eWaifu2xError_OK) {
-            const char * error = nullptr;
+            const char * error;
+
             if (waifu2xError == Waifu2x::eWaifu2xError_InvalidParameter)
                 error = "invalid parameter";
             else if (waifu2xError == Waifu2x::eWaifu2xError_FailedOpenModelFile)
@@ -328,6 +331,9 @@ static void VS_CC waifu2xCreate(const VSMap *in, VSMap *out, void *userData, VSC
                 error = "failed construct model";
             else if (waifu2xError == Waifu2x::eWaifu2xError_FailedCudaCheck)
                 error = "failed CUDA check";
+            else
+                error = "unknown error";
+
             throw std::string{ error } + " at initialization";
         }
     } catch (const std::string & error) {
@@ -342,9 +348,9 @@ static void VS_CC waifu2xCreate(const VSMap *in, VSMap *out, void *userData, VSC
 
     if (d.scale != 1 && d.vi.format->subSamplingW) {
         const double offset = 0.5 * (1 << d.vi.format->subSamplingW) - 0.5;
-        double shift = 0.;
+        double shift = 0.0;
         for (unsigned times = 0; times < iterTimesTwiceScaling; times++)
-            shift = shift * 2. + offset;
+            shift = shift * 2.0 + offset;
 
         VSNodeRef * node = vsapi->propGetNode(out, "clip", 0, nullptr);
         vsapi->clearMap(out);
@@ -375,7 +381,7 @@ static void VS_CC waifu2xCreate(const VSMap *in, VSMap *out, void *userData, VSC
 //////////////////////////////////////////
 // Init
 
-VS_EXTERNAL_API(void) VapourSynthPluginInit(VSConfigPlugin configFunc, VSRegisterFunction registerFunc, VSPlugin *plugin) {
+VS_EXTERNAL_API(void) VapourSynthPluginInit(VSConfigPlugin configFunc, VSRegisterFunction registerFunc, VSPlugin * plugin) {
     configFunc("com.holywu.waifu2x-caffe", "caffe", "Image Super-Resolution using Deep Convolutional Neural Networks", VAPOURSYNTH_API_VERSION, 1, plugin);
     registerFunc("Waifu2x",
                  "clip:clip;"
