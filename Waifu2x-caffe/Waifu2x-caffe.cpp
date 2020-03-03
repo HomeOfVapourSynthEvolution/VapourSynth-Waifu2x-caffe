@@ -103,7 +103,7 @@ static Waifu2x::eWaifu2xError filter(const VSFrameRef * src, VSFrameRef * dst, W
 
             if (plane == 0) {
                 waifu2xError = d->waifu2x->waifu2x(d->scale, srcp, dstp, srcWidth, srcHeight, 1, vsapi->getStride(src, plane), 1, vsapi->getStride(dst, plane),
-                                                   d->blockWidth, d->blockHeight, d->tta);
+                                                   d->blockWidth, d->blockHeight, d->tta, d->batch);
             } else {
                 const float * input = srcp;
                 float * VS_RESTRICT output = d->buffer;
