@@ -1,7 +1,7 @@
 project('Waifu2x-caffe', 'cpp',
   default_options : ['buildtype=release', 'b_ndebug=if-release', 'cpp_std=c++14'],
   meson_version : '>=0.48.0',
-  version : '13'
+  version : '14'
 )
 
 add_project_arguments('-ffast-math', language : 'cpp')
@@ -67,6 +67,6 @@ shared_module('waifu2x-caffe', sources,
   gnu_symbol_visibility : 'hidden'
 )
 
-install_subdir('Waifu2x-caffe/models',
+install_subdir('models',
   install_dir : vapoursynth_plugindir
 )
