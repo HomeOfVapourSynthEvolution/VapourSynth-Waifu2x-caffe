@@ -9,7 +9,7 @@ Note
 
 The folder `models` must be located in the same folder as `Waifu2x-caffe.dll`.
 
-Requires `cudnn64_7.dll` (cuDNN v7.4.1) to be in the search path. Due to the license of cuDNN, I can't distribute the required dll file. You have to register and download yourself at https://developer.nvidia.com/cudnn.
+Requires `cudnn64_7.dll` (cuDNN v7.6.5) to be in the search path. Due to the license of cuDNN, I can't distribute the required dll file. You have to register and download yourself at https://developer.nvidia.com/cudnn.
 
 
 Usage
@@ -28,9 +28,9 @@ Usage
 
 * scale: Upscaling factor. Must be a power of 2. Set to 1 for no upscaling.
 
-* block_w: The horizontal block size for dividing the image during processing. Smaller value results in lower VRAM usage, while larger value may not necessarily give faster speed. The optimal value may vary according to different graphics card and image size. It's recommended that the source's width is evenly divisible by the block size.
+* block_w: The horizontal block size for dividing the image during processing. Smaller value results in lower VRAM usage, while larger value may not necessarily give faster speed. The optimal value may vary according to different graphics card and image size. It's recommended that the source's width is divisible by the block size.
 
-* block_h: The same as `block_w` but for vertical. It's recommended that the source's height is evenly divisible by the block size.
+* block_h: The same as `block_w` but for vertical. It's recommended that the source's height is divisible by the block size.
 
 * model: Sets which model to use. Only `anime_style_art` is Y model (luma only), the others are RGB models.
   * 0 = anime_style_art (for 2D artwork)
