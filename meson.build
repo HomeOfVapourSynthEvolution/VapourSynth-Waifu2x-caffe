@@ -9,6 +9,7 @@ add_project_arguments('-ffast-math', language : 'cpp')
 sources = [
   'Waifu2x-caffe/cNet.cpp',
   'Waifu2x-caffe/cNet.h',
+  'Waifu2x-caffe/layer.h',
   'Waifu2x-caffe/stImage.cpp',
   'Waifu2x-caffe/stImage.h',
   'Waifu2x-caffe/waifu2x.cpp',

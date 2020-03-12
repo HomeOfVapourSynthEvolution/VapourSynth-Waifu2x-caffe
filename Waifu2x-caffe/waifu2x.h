@@ -1,5 +1,6 @@
 #pragma once
 
+#include "layer.h"
 #include <stdint.h>
 #include <string>
 #include <vector>
